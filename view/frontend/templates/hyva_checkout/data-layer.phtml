@@ -3,11 +3,11 @@ declare(strict_types=1);
 
 use Magento\Framework\View\Element\Template;
 use Tagging\GTM\DataLayer\Event\BeginCheckout as BeginCheckoutEvent;
-use Tagging\GTM\MageWire\Checkout as CheckoutComponent;
+use Tagging\GTM\MageWire\Component\AbstractComponent;
 
 /** @var Template $block */
 /** @var BeginCheckoutEvent $beginCheckoutEvent */
-/** @var CheckoutComponent $magewire */
+/** @var AbstractComponent $magewire */
 $magewire = $block->getData('magewire');
 if (false === $magewire->isHyvaCheckoutEnabled()) {
     return;

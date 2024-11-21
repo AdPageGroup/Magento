@@ -13,6 +13,17 @@ class ProductDataMapperTest extends TestCase
 {
     use AssertNonEmptyValueInArray;
 
+    private ProductInterfaceFactory $productFactory;
+    private ProductDataMapper $productDataMapper;
+
+    protected function setUp(): void
+    {
+        parent::setUp();
+        $objectManager = ObjectManager::getInstance();
+        $this->productFactory = $objectManager->get(ProductInterfaceFactory::class);
+        $this->productDataMapper = $objectManager->get(ProductDataMapper::class);
+    }
+
     public function testMapByProduct()
     {
         $product = $this->createProduct(
@@ -22,8 +33,7 @@ class ProductDataMapperTest extends TestCase
             1.42,
         );
 
-        $productDataMapper = ObjectManager::getInstance()->get(ProductDataMapper::class);
-        $productData = $productDataMapper->mapByProduct($product);
+        $productData = $this->productDataMapper->mapByProduct($product);
 
         $this->assertNonEmptyValueInArray('item_id', $productData);
         $this->assertSame(1, $productData['magento_id']);
@@ -34,17 +44,9 @@ class ProductDataMapperTest extends TestCase
         $this->assertSame(1.42, $productData['price']);
     }
 
-    /**
-     * @param int $id
-     * @param string $name
-     * @param string $sku
-     * @param float $price
-     * @return ProductInterface
-     */
     private function createProduct(int $id, string $name, string $sku, float $price): ProductInterface
     {
-        $productFactory = ObjectManager::getInstance()->get(ProductInterfaceFactory::class);
-        $product = $productFactory->create();
+        $product = $this->productFactory->create();
         $product->setId($id);
         $product->setName($name);
         $product->setSku($sku);
