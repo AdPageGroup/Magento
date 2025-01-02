@@ -1,5 +1,5 @@
 <?php
-namespace Tagging\GTM\Config\Source\BusinessVertical;
+namespace Tagging\GTM\Config\Source;
 
 class BusinessVertical implements \Magento\Framework\Option\ArrayInterface
 {
