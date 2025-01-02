@@ -42,17 +42,6 @@ class Purchase implements EventInterface
                 'shipping' => $this->priceFormatter->format((float)$order->getShippingInclTax()),
                 'coupon' => $order->getCouponCode(),
                 'items' => $this->orderItems->setOrder($order)->get()
-            ],
-            'user_data' => [
-                'customer_id' => $order->getCustomerId() ?? '',
-                'customer_email' => $order->getCustomerEmail() ?? '',
-                'customer_name' => $order->getCustomerFirstname() ?? '' . ' ' . $order->getCustomerLastname() ?? '',
-                'customer_phone' => $order->getCustomerTelephone() ?? '',
-                'customer_address' => $order->getCustomerAddress() ?? '',
-                'customer_city' => $order->getCustomerCity() ?? '',
-                'customer_state' => $order->getCustomerState() ?? '',
-                'customer_zip' => $order->getCustomerPostcode() ?? '',
-                'customer_country' => $order->getCustomerCountry() ?? '',
             ]
         ];
     }

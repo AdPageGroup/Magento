@@ -58,7 +58,7 @@
                 </field>
 
 
-                <field id="lifetime_value" type="select" translate="label" sortOrder="3" showInDefault="1" showInWebsite="1" showInStore="1">
+                <field id="lifetime_value" type="select" translate="label" sortOrder="6" showInDefault="1" showInWebsite="1" showInStore="1">
                     <label>Include lifetime value (Advanced)</label>
                     <source_model>Magento\Config\Model\Config\Source\Yesno</source_model>
                     <comment><![CDATA[<span>Disable the lifetime value variable in the data layer. ]]></comment>
@@ -66,7 +66,7 @@
                         <field id="enabled">1</field>
                     </depends>
                 </field>
-                <field id="choose_script_placement" type="select" translate="label" sortOrder="5" showInDefault="1" showInWebsite="1" showInStore="1">
+                <field id="choose_script_placement" type="select" translate="label" sortOrder="7" showInDefault="1" showInWebsite="1" showInStore="1">
                     <label>Choose script placement (Advanced)</label>
                     <source_model>Magento\Config\Model\Config\Source\Yesno</source_model>
                     <comment><![CDATA[<span>If you want to control on where the scripts are placed you can enable this option. Then the plugin will not load the files and you have to do it on your own.<span><br/>
