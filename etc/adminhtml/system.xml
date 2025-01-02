@@ -32,13 +32,7 @@
                         <field id="enabled">1</field>
                     </depends>
                 </field>
-                <field id="lifetime_value" type="select" translate="label" sortOrder="3" showInDefault="1" showInWebsite="1" showInStore="1">
-                    <label>Include lifetime value</label>
-                    <source_model>Magento\Config\Model\Config\Source\Yesno</source_model>
-                    <depends>
-                        <field id="enabled">1</field>
-                    </depends>
-                </field>
+
                 <field id="serverside_gtm_url" type="text" translate="label" sortOrder="3" showInDefault="1" showInWebsite="1" showInStore="1">
                     <label>Container URL</label>
                     <comment><![CDATA[<span>Enter the container url without https://<span><br/>
@@ -54,8 +48,26 @@
                         <field id="enabled">1</field>
                     </depends>
                 </field>
+                <field id="business_vertical" type="select" translate="label" sortOrder="5" showInDefault="1" showInWebsite="1" showInStore="1">
+                    <label>Business Vertical</label>
+                    <source_model>Tagging\GTM\Model\Config\Source\BusinessVertical</source_model>
+                    <comment><![CDATA[<span>This will add the google_business_vertical field to the data layer. ]]></comment>
+                    <depends>
+                        <field id="enabled">1</field>
+                    </depends>
+                </field>
+
+
+                <field id="lifetime_value" type="select" translate="label" sortOrder="3" showInDefault="1" showInWebsite="1" showInStore="1">
+                    <label>Include lifetime value (Advanced)</label>
+                    <source_model>Magento\Config\Model\Config\Source\Yesno</source_model>
+                    <comment><![CDATA[<span>Disable the lifetime value variable in the data layer. ]]></comment>
+                    <depends>
+                        <field id="enabled">1</field>
+                    </depends>
+                </field>
                 <field id="choose_script_placement" type="select" translate="label" sortOrder="5" showInDefault="1" showInWebsite="1" showInStore="1">
-                    <label>Choose script placement</label>
+                    <label>Choose script placement (Advanced)</label>
                     <source_model>Magento\Config\Model\Config\Source\Yesno</source_model>
                     <comment><![CDATA[<span>If you want to control on where the scripts are placed you can enable this option. Then the plugin will not load the files and you have to do it on your own.<span><br/>
                     <b>NOTE</b>; If all necessary scripts are not included, tracking will not function. ]]></comment>
