@@ -8,13 +8,13 @@ use Magento\Framework\Exception\LocalizedException;
 use Magento\Framework\Exception\NoSuchEntityException;
 use Tagging\GTM\Api\Data\EventInterface;
 use Tagging\GTM\DataLayer\Tag\PageTitle;
-use Tagging\GTM\DataLayer\Tag\PageType;
+use Tagging\GTM\DataLayer\Tag\PagePath;
 use Tagging\GTM\DataLayer\Tag\Store\CurrentStore;
 
 class UserData implements EventInterface
 {
     private PageTitle $pageTitle;
-    private PageType $pageType;
+    private PagePath $pagePath;
     private CurrentStore $currentStore;
 
     /**
@@ -22,11 +22,11 @@ class UserData implements EventInterface
      */
     public function __construct(
         PageTitle $pageTitle,
-        PageType $pageType,
+        PagePath $pagePath,
         CurrentStore $currentStore
     ) {
         $this->pageTitle = $pageTitle;
-        $this->pageType = $pageType;
+        $this->pagePath = $pagePath;
         $this->currentStore = $currentStore;
     }
 
@@ -41,9 +41,11 @@ class UserData implements EventInterface
             'event' => 'trytagging_user_data',
             'page' => [
                 'title' => $this->pageTitle->get(),
-                'type' => $this->pageType->get()
+                'location' => $this->pagePath->get()
             ],
-            'store' => $this->currentStore->get(),
+            'cart' => [
+                'total' => doubleval(0)
+            ]
         ];
     }
 }

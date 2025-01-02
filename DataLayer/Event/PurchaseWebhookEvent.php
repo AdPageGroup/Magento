@@ -101,6 +101,15 @@ class PurchaseWebhookEvent
         try {
             $data['user_data'] = [
                 "customer_id" => $order->getCustomerId() ?? '',
+                "customer_email" => $order->getCustomerEmail() ?? '',
+                "customer_name" => $order->getCustomerFirstname() ?? '' . ' ' . $order->getCustomerLastname() ?? '',
+                "customer_phone" => $order->getCustomerTelephone() ?? '',
+                "customer_address" => $order->getCustomerAddress() ?? '',
+                "customer_city" => $order->getCustomerCity() ?? '',
+                "customer_state" => $order->getCustomerState() ?? '',
+                "customer_zip" => $order->getCustomerPostcode() ?? '',
+                "customer_country" => $order->getCustomerCountry() ?? '',
+
                 "billing_first_name" => $order->getBillingAddress() ? $order->getBillingAddress()->getFirstname() ?? '' : '',
                 "billing_last_name" => $order->getBillingAddress() ? $order->getBillingAddress()->getLastname() ?? '' : '',
                 "billing_address" => $order->getBillingAddress() && $order->getBillingAddress()->getStreet() ? $order->getBillingAddress()->getStreet()[0] ?? '' : '',
@@ -119,9 +128,6 @@ class PurchaseWebhookEvent
                 "shipping_state" => $order->getShippingAddress() ? $order->getShippingAddress()->getRegion() ?? '' : '',
                 "shipping_city" => $order->getShippingAddress() ? $order->getShippingAddress()->getCity() ?? '' : '',
                 "shipping_phone" => $order->getShippingAddress() ? $order->getShippingAddress()->getTelephone() ?? '' : '',
-                "email" => $order->getCustomerEmail() ?? '',
-                "first_name" => $order->getCustomerFirstname() ?? '',
-                "last_name" => $order->getCustomerLastname() ?? '',
                 "new_customer" => (string)($order->getCustomerIsGuest() ? "true" : "false")
             ];
         } catch (\Exception $e) {

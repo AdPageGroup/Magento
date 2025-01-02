@@ -43,13 +43,18 @@ define(["googleTagManagerLogger"], function (logger) {
 
     logger(message, eventData);
     window.dataLayer = window.dataLayer || [];
+
     if (cleanEventData && cleanEventData.ecommerce) {
       window.dataLayer.push({ ecommerce: null });
     }
 
     if (window.taggingHelpers) {
       cleanEventData.marketing = window.taggingHelpers.getMarketingObject();
-      cleanEventData.device = window.taggingHelpers.getDeviceInfo();
+
+      if (eventData.event === 'trytagging_user_data') {
+        cleanEventData.device = window.taggingHelpers.getDeviceInfo();
+        cleanEventData.cart.total = 0.00; // TODO: Needs to be implemented
+      }
     }
 
     if (cleanEventData.marketing) {
