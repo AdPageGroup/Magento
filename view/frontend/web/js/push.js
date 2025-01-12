@@ -53,7 +53,7 @@ define(["googleTagManagerLogger"], function (logger) {
 
       if (eventData.event === 'trytagging_user_data') {
         cleanEventData.device = window.taggingHelpers.getDeviceInfo();
-        cleanEventData.cart.total = 0.00; // TODO: Needs to be implemented
+        // cleanEventData.cart.total = 0.00;
       }
     }
 

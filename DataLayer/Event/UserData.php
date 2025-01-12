@@ -42,9 +42,6 @@ class UserData implements EventInterface
             'page' => [
                 'title' => $this->pageTitle->get(),
                 'location' => $this->pagePath->get()
-            ],
-            'cart' => [
-                'total' => doubleval(0)
             ]
         ];
     }
