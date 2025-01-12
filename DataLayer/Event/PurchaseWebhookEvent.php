@@ -113,6 +113,8 @@ class PurchaseWebhookEvent
                 "customer_id" => $order->getCustomerId() ?? '',
                 "customer_email" => $email,
                 "customer_name" => $firstName . ' ' . $lastName,
+                "customer_first_name" => $firstName,
+                "customer_last_name" => $lastName,
                 "customer_phone" => $phone,
                 "customer_address" => $address,
                 "customer_city" => $city,
