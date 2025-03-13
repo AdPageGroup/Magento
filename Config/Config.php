@@ -58,6 +58,22 @@ class Config implements ArgumentInterface
         return true;
     }
 
+    public function isEnabledBusinessVertical(): bool
+    {
+        $configValue = $this->getModuleConfigValue('business_vertical', '');
+
+        if (empty($configValue)) {
+            return false;
+        }
+
+        return true;
+    }
+
+    public function getBusinessVertical(): string
+    {
+        return (string)$this->getModuleConfigValue('business_vertical', '');
+    }
+
     /**
      * Check if lifetime value calculation is enabled in configuration
      *

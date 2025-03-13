@@ -39,7 +39,11 @@ declare(strict_types=1);
 
         if (window.taggingHelpers) {
             eventData.marketing = window.taggingHelpers.getMarketingObject();
-            eventData.device = window.taggingHelpers.getDeviceInfo();
+
+            if (eventData.event === 'trytagging_user_data') {
+                eventData.device = window.taggingHelpers.getDeviceInfo();
+                // eventData.cart.total = 0.00; TODO: Needs to be implemented
+            }
         }
 
         if (eventData.marketing) {

@@ -27,9 +27,7 @@ class ProductDataMapperTest extends TestCase
 
         $this->assertNonEmptyValueInArray('item_id', $productData);
         $this->assertSame(1, $productData['magento_id']);
-        $this->assertSame('product1', $productData['magento_sku']);
         $this->assertSame('product1', $productData['item_id']);
-        $this->assertSame('product1', $productData['item_sku']);
         $this->assertSame('Product 1', $productData['item_name']);
         $this->assertSame(1.42, $productData['price']);
     }

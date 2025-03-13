@@ -21,6 +21,7 @@ define([
             const eventData = {
                 'event': 'trytagging_add_to_cart',
                 'ecommerce': {
+                    'value': productData.price * productData.quantity,
                     'items': [productData]
                 }
             };

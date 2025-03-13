@@ -55,7 +55,7 @@ class OrderItemDataMapper
         $orderItemData = [
             'item_id' => $orderItem->getSku(),
             'item_name' => $orderItem->getName(),
-            'discount' => (float) $orderItem->getDiscountAmount(),
+            'discount' => $this->priceFormatter->format((float) $orderItem->getDiscountAmount()),
             'quantity' => (float) $orderItem->getQtyOrdered(),
             'price' => $this->getPrice($orderItem)
         ];

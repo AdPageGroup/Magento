@@ -75,16 +75,14 @@ class ProductDataMapper
             $productData[$dataLayerKey] = $attributeValue;
         }
 
-        $productData['item_id'] = $product->getSku();
-        $productData['item_sku'] = $product->getSku();
-        $productData['magento_sku'] = $product->getSku();
+        $productData['item_id'] = strval($product->getSku());
         $productData['magento_id'] = $product->getId();
 
         $parentIds = $this->configurableType->getParentIdsByChild($product->getId());
 
         if (!empty($parentIds)) {
             $parentProduct = $this->productRepository->getById($parentIds[0]);
-            $productData['item_id'] = $parentProduct->getSku();
+            $productData['item_id'] = strval($parentProduct->getSku());
             $productData['item_variant'] = $product->getSku();
         }
 
@@ -100,6 +98,10 @@ class ProductDataMapper
         $productData = $this->attachCategoriesData($product, $productData);
         $productData = $this->parseDataLayerMapping($product, $productData);
         $productData['index'] = $this->counter++;
+
+        if ($this->config->isEnabledBusinessVertical()) {
+            $productData['google_business_vertical'] = $this->config->getBusinessVertical();
+        }
 
         // @todo: Add "variant" reference to Configurable Product
 

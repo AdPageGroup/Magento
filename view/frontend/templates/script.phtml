@@ -48,10 +48,8 @@ $config = $block->getConfig();
                 })
             })
         })(['load']);
-</script>
 
-<?php if ($config->isDebug()) : ?>
-    <script>
+    <?php if ($config->isDebug()) : ?>
         window.Tagging_GTM_DEBUG = true;
-    </script>
-<?php endif; ?>
+    <?php endif; ?>
+</script>

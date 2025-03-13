@@ -99,17 +99,38 @@ class PurchaseWebhookEvent
         ];
 
         try {
+            $email = $order->getBillingAddress() ? $order->getBillingAddress()->getEmail() ?? '' : '';
+            $firstName = $order->getBillingAddress() ? $order->getBillingAddress()->getFirstname() ?? '' : '';
+            $lastName = $order->getBillingAddress() ? $order->getBillingAddress()->getLastname() ?? '' : '';
+            $phone = $order->getBillingAddress() ? $order->getBillingAddress()->getTelephone() ?? '' : '';
+            $address = $order->getBillingAddress() && $order->getBillingAddress()->getStreet() ? $order->getBillingAddress()->getStreet()[0] ?? '' : '';
+            $city = $order->getBillingAddress() ? $order->getBillingAddress()->getCity() ?? '' : '';
+            $state = $order->getBillingAddress() ? $order->getBillingAddress()->getRegion() ?? '' : '';
+            $postcode = $order->getBillingAddress() ? $order->getBillingAddress()->getPostcode() ?? '' : '';
+            $country = $order->getBillingAddress() ? $order->getBillingAddress()->getCountryId() ?? '' : '';
+
             $data['user_data'] = [
                 "customer_id" => $order->getCustomerId() ?? '',
-                "billing_first_name" => $order->getBillingAddress() ? $order->getBillingAddress()->getFirstname() ?? '' : '',
-                "billing_last_name" => $order->getBillingAddress() ? $order->getBillingAddress()->getLastname() ?? '' : '',
-                "billing_address" => $order->getBillingAddress() && $order->getBillingAddress()->getStreet() ? $order->getBillingAddress()->getStreet()[0] ?? '' : '',
-                "billing_postcode" => $order->getBillingAddress() ? $order->getBillingAddress()->getPostcode() ?? '' : '',
-                "billing_country" => $order->getBillingAddress() ? $order->getBillingAddress()->getCountryId() ?? '' : '',
-                "billing_state" => $order->getBillingAddress() ? $order->getBillingAddress()->getRegion() ?? '' : '',
-                "billing_city" => $order->getBillingAddress() ? $order->getBillingAddress()->getCity() ?? '' : '',
-                "billing_email" => $order->getBillingAddress() ? $order->getBillingAddress()->getEmail() ?? '' : '',
-                "billing_phone" => $order->getBillingAddress() ? $order->getBillingAddress()->getTelephone() ?? '' : '',
+                "customer_email" => $email,
+                "customer_name" => $firstName . ' ' . $lastName,
+                "customer_first_name" => $firstName,
+                "customer_last_name" => $lastName,
+                "customer_phone" => $phone,
+                "customer_address" => $address,
+                "customer_city" => $city,
+                "customer_state" => $state,
+                "customer_zip" => $postcode,
+                "customer_country" => $country,
+
+                "billing_first_name" => $firstName,
+                "billing_last_name" => $lastName,
+                "billing_address" => $address,
+                "billing_postcode" => $postcode,
+                "billing_country" => $country,
+                "billing_state" => $state,
+                "billing_city" => $city,
+                "billing_email" => $email,
+                "billing_phone" => $phone,
                 "shipping_first_name" => $order->getShippingAddress() ? $order->getShippingAddress()->getFirstname() ?? '' : '',
                 "shipping_last_name" => $order->getShippingAddress() ? $order->getShippingAddress()->getLastname() ?? '' : '',
                 "shipping_company" => $order->getShippingAddress() ? $order->getShippingAddress()->getCompany() ?? '' : '',
@@ -119,9 +140,6 @@ class PurchaseWebhookEvent
                 "shipping_state" => $order->getShippingAddress() ? $order->getShippingAddress()->getRegion() ?? '' : '',
                 "shipping_city" => $order->getShippingAddress() ? $order->getShippingAddress()->getCity() ?? '' : '',
                 "shipping_phone" => $order->getShippingAddress() ? $order->getShippingAddress()->getTelephone() ?? '' : '',
-                "email" => $order->getCustomerEmail() ?? '',
-                "first_name" => $order->getCustomerFirstname() ?? '',
-                "last_name" => $order->getCustomerLastname() ?? '',
                 "new_customer" => (string)($order->getCustomerIsGuest() ? "true" : "false")
             ];
         } catch (\Exception $e) {

@@ -81,7 +81,6 @@ class CategoryPageTest extends PageTestCase
         $this->assertNotEmpty($event['ecommerce']['items'], var_export($event, true));
         foreach ($event['ecommerce']['items'] as $productData) {
             $this->assertNotEmpty($productData['item_id']);
-            $this->assertNotEmpty($productData['item_sku']);
             $this->assertNotEmpty($productData['item_list_name']);
         }
     }
