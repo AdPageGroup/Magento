@@ -57,4 +57,10 @@
     <type name="Magento\Sales\Api\OrderRepositoryInterface">
         <plugin name="tagging_gtm_order_repository_plugin" type="Tagging\GTM\Plugin\OrderRepositoryPlugin" />
     </type>
+
+    <type name="Tagging\GTM\MageWire\Component\AbstractComponent">
+        <arguments>
+            <argument name="componentFactory" xsi:type="object">Tagging\GTM\MageWire\Component\ComponentFactory</argument>
+        </arguments>
+    </type>
 </config>
