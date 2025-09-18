@@ -75,11 +75,13 @@ class ProductDataMapper
             $productData[$dataLayerKey] = $attributeValue;
         }
 
+        $brand = $product->getAttributeText('manufacturer') ?? null;
+
         $productData['item_id'] = $product->getSku();
         $productData['item_sku'] = $product->getSku();
         $productData['magento_sku'] = $product->getSku();
         $productData['magento_id'] = $product->getId();
-        $productData['item_manufacturer'] = $product->getAttributeText('manufacturer');
+        $productData['item_brand'] = $brand;
 
         $parentIds = $this->configurableType->getParentIdsByChild($product->getId());
 
@@ -101,9 +103,6 @@ class ProductDataMapper
         $productData = $this->attachCategoriesData($product, $productData);
         $productData = $this->parseDataLayerMapping($product, $productData);
         $productData['index'] = $this->counter++;
-
-        // testing vicklo
-        $productData['extension_attributes'] = $product->getExtensionAttributes();
 
 
         // @todo: Add "variant" reference to Configurable Product

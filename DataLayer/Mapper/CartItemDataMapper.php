@@ -50,7 +50,6 @@ class CartItemDataMapper
             $cartItemData = [];
         }
 
-        $extensionAttributes = $cartItem->getExtensionAttributes();
 
         return array_merge($cartItemData, [
             'item_sku' => $cartItem->getSku(),
