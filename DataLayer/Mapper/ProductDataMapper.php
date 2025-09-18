@@ -75,7 +75,7 @@ class ProductDataMapper
             $productData[$dataLayerKey] = $attributeValue;
         }
 
-        $brand = $product->getAttributeText('manufacturer') ?? null;
+        $brand = $product->getAttributeText('manufacturer') === false ? null : $product->getAttributeText('manufacturer');
 
         $productData['item_id'] = $product->getSku();
         $productData['item_sku'] = $product->getSku();
