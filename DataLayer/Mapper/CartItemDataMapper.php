@@ -45,6 +45,7 @@ class CartItemDataMapper
     {
         try {
             $product = $this->productProvider->getBySku($cartItem->getSku());
+            print_r($product);
             $cartItemData = $this->productDataMapper->mapByProduct($product);
         } catch (NoSuchEntityException $e) {
             $cartItemData = [];
