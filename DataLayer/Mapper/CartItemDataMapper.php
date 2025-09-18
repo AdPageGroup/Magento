@@ -50,13 +50,12 @@ class CartItemDataMapper
             $cartItemData = [];
         }
 
-
         return array_merge($cartItemData, [
             'item_sku' => $cartItem->getSku(),
             'item_name' => $cartItem->getName(),
             'order_item_id' => $cartItem->getItemId(),
             'quantity' => (float) $cartItem->getQty(),
-            'price' => $this->getPrice($cartItem),
+            'price' => $this->getPrice($cartItem)
         ]);
     }
 
