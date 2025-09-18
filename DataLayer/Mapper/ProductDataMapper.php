@@ -104,7 +104,6 @@ class ProductDataMapper
         $productData = $this->parseDataLayerMapping($product, $productData);
         $productData['index'] = $this->counter++;
 
-
         // @todo: Add "variant" reference to Configurable Product
 
         return $productData;
