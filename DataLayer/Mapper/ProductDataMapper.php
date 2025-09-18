@@ -101,6 +101,8 @@ class ProductDataMapper
         $productData = $this->parseDataLayerMapping($product, $productData);
         $productData['index'] = $this->counter++;
         $productData['extension_attributes'] = $product->getExtensionAttributes();
+        $productData['marketing_attributes'] = $product->getResource()->getAttribute('manufacture')->getFrontend()->getValue($product);
+
 
         // @todo: Add "variant" reference to Configurable Product
 
@@ -112,7 +114,7 @@ class ProductDataMapper
      */
     private function getProductFields(): array
     {
-        return array_filter(['id', 'name', 'brand', 'extension_attributes']);
+        return array_filter(['id', 'name', 'brand']);
     }
 
     /**
