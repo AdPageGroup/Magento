@@ -58,7 +58,6 @@ class CartItemDataMapper
             'order_item_id' => $cartItem->getItemId(),
             'quantity' => (float) $cartItem->getQty(),
             'price' => $this->getPrice($cartItem),
-            'item_manufacturer' => $cartItem->getAttributeText('manufacturer')
         ]);
     }
 

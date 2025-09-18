@@ -79,6 +79,7 @@ class ProductDataMapper
         $productData['item_sku'] = $product->getSku();
         $productData['magento_sku'] = $product->getSku();
         $productData['magento_id'] = $product->getId();
+        $productData['item_manufacturer'] = $product->getAttributeText('manufacturer');
 
         $parentIds = $this->configurableType->getParentIdsByChild($product->getId());
 
@@ -100,6 +101,8 @@ class ProductDataMapper
         $productData = $this->attachCategoriesData($product, $productData);
         $productData = $this->parseDataLayerMapping($product, $productData);
         $productData['index'] = $this->counter++;
+
+        // testing vicklo
         $productData['extension_attributes'] = $product->getExtensionAttributes();
 
 
