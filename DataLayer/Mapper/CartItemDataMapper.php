@@ -50,7 +50,7 @@ class CartItemDataMapper
             $cartItemData = [];
         }
 
-        $extensionAttributes = $cartItemData->getExtensionAttributes();
+        $extensionAttributes = $cartItem->getExtensionAttributes();
 
         return array_merge($cartItemData, [
             'item_sku' => $cartItem->getSku(),
@@ -58,7 +58,7 @@ class CartItemDataMapper
             'order_item_id' => $cartItem->getItemId(),
             'quantity' => (float) $cartItem->getQty(),
             'price' => $this->getPrice($cartItem),
-            'extension_attributes' => json_encode($extensionAttributes)
+            'extension_attributes' => $extensionAttributes ? json_encode($extensionAttributes) : null
         ]);
     }
 
