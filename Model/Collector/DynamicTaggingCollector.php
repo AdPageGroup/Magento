@@ -20,54 +20,43 @@ class DynamicTaggingCollector implements CollectorInterface
 
     public function collect(array $defaultPolicies = []): array
     {
-        error_log('Tagging GTM CSP: Collector called');
-        
         try {
-            // Only add policies if the module is enabled and placed by plugin
             if (!$this->config->isEnabled()) {
-                error_log('Tagging GTM CSP: Module not enabled');
+                echo 'Module not enabled';
                 return [];
             }
-            
+
             if (!$this->config->isPlacedByPlugin()) {
-                error_log('Tagging GTM CSP: Module not placed by plugin');
+                echo 'Module not placed by plugin';
                 return [];
             }
 
-            error_log('Tagging GTM CSP: Module is enabled and placed by plugin');
-
-            // Get the configured GTM URL from the config
             $gtmUrl = $this->config->getGoogleTagmanagerUrl();
-            error_log('Tagging GTM CSP: Raw GTM URL from config: "' . $gtmUrl . '"');
-            
-            // If no custom URL is configured, return empty policies
+
             if (empty($gtmUrl)) {
-                error_log('Tagging GTM CSP: No GTM URL configured - returning empty policies');
+                echo 'No GTM URL configured';
                 return [];
             }
 
-            // Ensure the URL has proper protocol
             if (!preg_match('/^https?:\/\//', $gtmUrl)) {
-                $originalUrl = $gtmUrl;
+                echo 'Adding protocol to URL: ' . $gtmUrl;
                 $gtmUrl = 'https://' . $gtmUrl;
-                error_log('Tagging GTM CSP: Added protocol to URL: "' . $originalUrl . '" -> "' . $gtmUrl . '"');
             }
 
-            // Parse the URL to get the domain
             $parsedUrl = parse_url($gtmUrl);
-            error_log('Tagging GTM CSP: Parsed URL: ' . print_r($parsedUrl, true));
-            
+
             if (!$parsedUrl || !isset($parsedUrl['host'])) {
-                error_log('Tagging GTM CSP: Invalid URL format: ' . $gtmUrl);
+                echo 'Invalid URL format: ' . $gtmUrl;
                 return [];
             }
 
             $domain = $parsedUrl['host'];
             $protocol = $parsedUrl['scheme'] ?? 'https';
 
-            // Build the full URL for CSP
             $taggingUrl = $protocol . '://' . $domain;
-            error_log('Tagging GTM CSP: Final domain for CSP: ' . $taggingUrl);
+
+            echo 'Tagging URL: ' . $taggingUrl;
+
 
             $policies = [
                 new FetchPolicy(
@@ -84,15 +73,10 @@ class DynamicTaggingCollector implements CollectorInterface
                 )
             ];
 
-            error_log('Tagging GTM CSP: Created ' . count($policies) . ' policies');
-            error_log('Tagging GTM CSP: Policies - script-src: ' . $taggingUrl . ', connect-src: ' . $taggingUrl);
+           return array_merge($defaultPolicies, $policies);
 
-            return $policies;
-            
         } catch (\Exception $e) {
-            // Log error and return empty policies to avoid breaking the site
-            error_log('Tagging GTM CSP Error: ' . $e->getMessage());
-            error_log('Tagging GTM CSP Error Stack: ' . $e->getTraceAsString());
+            echo 'Error: ' . $e->getMessage();
             return [];
         }
     }
