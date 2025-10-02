@@ -15,8 +15,13 @@ $secureRenderer = $objectManager->get(\Magento\Framework\View\Helper\SecureHtmlR
 
 if ($config->isEnabled() && $config->getGoogleTagmanagerUrl() && strlen($config->getGoogleTagmanagerUrl()) > 0 && $config->isPlacedByPlugin()) :
     
+    // Debug logging
+    error_log('Tagging GTM iframe.phtml: Module enabled and configured');
+    error_log('Tagging GTM iframe.phtml: GTM URL: ' . $config->getGoogleTagmanagerUrl());
+    
     // First script - proxy domain
     $proxyScript = "window.tagging_proxy_domain = 'https://" . $config->getGoogleTagmanagerUrl() . "';";
+    error_log('Tagging GTM iframe.phtml: Proxy script: ' . $proxyScript);
 
     if ($isHyva): ?>
         <script><?= $proxyScript ?></script><?php $hyvaCsp->registerInlineScript() ?>
@@ -24,8 +29,12 @@ if ($config->isEnabled() && $config->getGoogleTagmanagerUrl() && strlen($config-
         echo $secureRenderer->renderTag('script', ['type' => 'text/javascript'], $proxyScript, false);
     endif; ?>
     
-    <!-- External script - no CSP needed as it's whitelisted in csp_whitelist.xml -->
-    <script defer src='https://<?= $config->getGoogleTagmanagerUrl() ?>/user-data-minified.es.js'></script>
+    <!-- External script - CSP should be handled by DynamicTaggingCollector -->
+    <?php 
+    $scriptUrl = 'https://' . $config->getGoogleTagmanagerUrl() . '/user-data-minified.es.js';
+    error_log('Tagging GTM iframe.phtml: Script URL: ' . $scriptUrl);
+    ?>
+    <script defer src='<?= $scriptUrl ?>'></script>
     
     <?php
     // Main functionality script
