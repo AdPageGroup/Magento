@@ -4,13 +4,18 @@ declare(strict_types=1);
 
 use Magento\Framework\View\Element\Template;
 use Tagging\GTM\Config\Config;
+use Magento\Csp\Helper\CspNonceProvider;
 
 /** @var Config $config */
 /** @var Template $block */
 $config = $block->getConfig();
 
-// Get SecureHtmlRenderer using Object Manager for compatibility
+// Get CSP nonce provider for modern CSP compliance
 $objectManager = \Magento\Framework\App\ObjectManager::getInstance();
+$cspNonceProvider = $objectManager->get(CspNonceProvider::class);
+$nonce = $cspNonceProvider->generateNonce();
+
+// Fallback to SecureHtmlRenderer for compatibility
 $secureRenderer = $objectManager->get(\Magento\Framework\View\Helper\SecureHtmlRenderer::class);
 
 // Detect if we're in Hyvä context
@@ -66,9 +71,9 @@ if ($isHyva): ?>
     <script>
         <?= $scriptContent ?>
     </script><?php $hyvaCsp->registerInlineScript() ?>
-<?php else:
-    echo $secureRenderer->renderTag('script', ['type' => 'text/javascript'], $scriptContent, false);
-endif; ?>
+<?php else: ?>
+    <script nonce="<?= $nonce ?>"><?= $scriptContent ?></script>
+<?php endif; ?>
 
 <?php if ($config->isDebug()) : ?>
     <?php
@@ -77,7 +82,7 @@ endif; ?>
         <script>
             <?= $debugScript ?>
         </script><?php $hyvaCsp->registerInlineScript() ?>
-    <?php else:
-        echo $secureRenderer->renderTag('script', ['type' => 'text/javascript'], $debugScript, false);
-    endif; ?>
+    <?php else: ?>
+        <script nonce="<?= $nonce ?>"><?= $debugScript ?></script>
+    <?php endif; ?>
 <?php endif; ?>

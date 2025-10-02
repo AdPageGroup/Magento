@@ -3,14 +3,19 @@ declare(strict_types=1);
 
 use Tagging\GTM\Config\Config;
 use Magento\Framework\View\Element\Template;
+use Magento\Csp\Helper\CspNonceProvider;
 
 /** @var Config $config */
 /** @var Template $block */
 $config = $block->getConfig();
 $isHyva = isset($hyvaCsp) && $hyvaCsp;
 
-// Get SecureHtmlRenderer using Object Manager for compatibility
+// Get CSP nonce provider for modern CSP compliance
 $objectManager = \Magento\Framework\App\ObjectManager::getInstance();
+$cspNonceProvider = $objectManager->get(CspNonceProvider::class);
+$nonce = $cspNonceProvider->generateNonce();
+
+// Fallback to SecureHtmlRenderer for compatibility
 $secureRenderer = $objectManager->get(\Magento\Framework\View\Helper\SecureHtmlRenderer::class);
 
 if ($config->isEnabled() && $config->getGoogleTagmanagerUrl() && strlen($config->getGoogleTagmanagerUrl()) > 0 && $config->isPlacedByPlugin()) :
@@ -20,9 +25,9 @@ if ($config->isEnabled() && $config->getGoogleTagmanagerUrl() && strlen($config-
     
     if ($isHyva): ?>
         <script><?= $proxyScript ?></script><?php $hyvaCsp->registerInlineScript() ?>
-    <?php else:
-        echo $secureRenderer->renderTag('script', ['type' => 'text/javascript'], $proxyScript, false);
-    endif; ?>
+    <?php else: ?>
+        <script nonce="<?= $nonce ?>"><?= $proxyScript ?></script>
+    <?php endif; ?>
     
     <!-- External script - no CSP needed as it's whitelisted in csp_whitelist.xml -->
     <script defer src='https://<?= $config->getGoogleTagmanagerUrl() ?>/user-data-minified.es.js'></script>
@@ -30,7 +35,7 @@ if ($config->isEnabled() && $config->getGoogleTagmanagerUrl() && strlen($config-
     <?php
     // Main functionality script
     $mainScript = <<<'SCRIPT'
-/**
+/** 
  * Generate simple hash based only on items and quantities
  * @param {Object} eventData - GA4 event data
  * @returns {string} Base64 encoded hash
@@ -109,7 +114,7 @@ SCRIPT;
     
     if ($isHyva): ?>
         <script><?= $mainScript ?></script><?php $hyvaCsp->registerInlineScript() ?>
-    <?php else:
-        echo $secureRenderer->renderTag('script', ['type' => 'text/javascript'], $mainScript, false);
-    endif;
+    <?php else: ?>
+        <script nonce="<?= $nonce ?>"><?= $mainScript ?></script>
+    <?php endif;
 endif; ?>
