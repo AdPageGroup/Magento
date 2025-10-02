@@ -5,7 +5,6 @@ use Magento\Catalog\Api\Data\ProductInterface;
 use Magento\Framework\View\Element\Template;
 use Tagging\GTM\DataLayer\Tag\Product\CurrentProduct;
 use Tagging\GTM\ViewModel\DataLayer;
-use Magento\Csp\Helper\CspNonceProvider;
 
 /** @var Template $block */
 /** @var CurrentProduct $productDetails */
@@ -26,13 +25,8 @@ $productId = $product->getId();
 // Detect if we're in Hyvä context
 $isHyva = isset($hyvaCsp) && $hyvaCsp;
 
-// Get CSP nonce provider for modern CSP compliance
-$objectManager = \Magento\Framework\App\ObjectManager::getInstance();
-$cspNonceProvider = $objectManager->get(CspNonceProvider::class);
-$nonce = $cspNonceProvider->generateNonce();
-
-// Fallback to SecureHtmlRenderer for compatibility
-$secureRenderer = $objectManager->get(\Magento\Framework\View\Helper\SecureHtmlRenderer::class);
+// Get SecureHtmlRenderer for CSP compliance
+$secureRenderer = $block->getSecureHtmlRenderer();
 
 // Build the script content
 $scriptContent = "window['Tagging_GTM_PRODUCT_DATA_ID_{$productId}'] = {$productData};";
@@ -40,6 +34,6 @@ $scriptContent = "window['Tagging_GTM_PRODUCT_DATA_ID_{$productId}'] = {$product
 // Render based on context
 if ($isHyva): ?>
     <script><?= $scriptContent ?></script><?php $hyvaCsp->registerInlineScript() ?>
-<?php else: ?>
-    <script nonce="<?= $nonce ?>"><?= $scriptContent ?></script>
-<?php endif; ?>
+<?php else:
+    echo $secureRenderer->renderTag('script', ['type' => 'text/javascript'], $scriptContent, false);
+endif; ?>

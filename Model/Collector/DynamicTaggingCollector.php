@@ -69,7 +69,7 @@ class DynamicTaggingCollector implements CollectorInterface
             return $policies;
             
         } catch (\Exception $e) {
-            // Log error and return empty policies to avoid breaking the site
+            // Return empty policies to avoid breaking the site
             return [];
         }
     }

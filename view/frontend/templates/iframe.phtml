@@ -3,20 +3,14 @@ declare(strict_types=1);
 
 use Tagging\GTM\Config\Config;
 use Magento\Framework\View\Element\Template;
-use Magento\Csp\Helper\CspNonceProvider;
 
 /** @var Config $config */
 /** @var Template $block */
 $config = $block->getConfig();
 $isHyva = isset($hyvaCsp) && $hyvaCsp;
 
-// Get CSP nonce provider for modern CSP compliance
-$objectManager = \Magento\Framework\App\ObjectManager::getInstance();
-$cspNonceProvider = $objectManager->get(CspNonceProvider::class);
-$nonce = $cspNonceProvider->generateNonce();
-
-// Fallback to SecureHtmlRenderer for compatibility
-$secureRenderer = $objectManager->get(\Magento\Framework\View\Helper\SecureHtmlRenderer::class);
+// Get SecureHtmlRenderer for CSP compliance
+$secureRenderer = $block->getSecureHtmlRenderer();
 
 if ($config->isEnabled() && $config->getGoogleTagmanagerUrl() && strlen($config->getGoogleTagmanagerUrl()) > 0 && $config->isPlacedByPlugin()) :
     
@@ -31,9 +25,9 @@ if ($config->isEnabled() && $config->getGoogleTagmanagerUrl() && strlen($config-
     
     if ($isHyva): ?>
         <script><?= $proxyScript ?></script><?php $hyvaCsp->registerInlineScript() ?>
-    <?php else: ?>
-        <script nonce="<?= $nonce ?>"><?= $proxyScript ?></script>
-    <?php endif; ?>
+    <?php else:
+        echo $secureRenderer->renderTag('script', ['type' => 'text/javascript'], $proxyScript, false);
+    endif; ?>
     
     <!-- External script - CSP is now handled dynamically by DynamicTaggingCollector -->
     <script defer src='<?= $gtmUrl ?>/user-data-minified.es.js'></script>
@@ -120,7 +114,7 @@ SCRIPT;
     
     if ($isHyva): ?>
         <script><?= $mainScript ?></script><?php $hyvaCsp->registerInlineScript() ?>
-    <?php else: ?>
-        <script nonce="<?= $nonce ?>"><?= $mainScript ?></script>
-    <?php endif;
+    <?php else:
+        echo $secureRenderer->renderTag('script', ['type' => 'text/javascript'], $mainScript, false);
+    endif;
 endif; ?>
