@@ -9,8 +9,9 @@ use Tagging\GTM\Config\Config;
 /** @var Template $block */
 $config = $block->getConfig();
 
-// Get SecureHtmlRenderer for CSP compliance
-$secureRenderer = $block->getSecureHtmlRenderer();
+// Get SecureHtmlRenderer using Object Manager for compatibility
+$objectManager = \Magento\Framework\App\ObjectManager::getInstance();
+$secureRenderer = $objectManager->get(\Magento\Framework\View\Helper\SecureHtmlRenderer::class);
 
 // Detect if we're in Hyvä context
 $isHyva = isset($hyvaCsp) && $hyvaCsp;

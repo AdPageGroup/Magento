@@ -25,8 +25,9 @@ $productId = $product->getId();
 // Detect if we're in Hyvä context
 $isHyva = isset($hyvaCsp) && $hyvaCsp;
 
-// Get SecureHtmlRenderer for CSP compliance
-$secureRenderer = $block->getSecureHtmlRenderer();
+// Get SecureHtmlRenderer using Object Manager for compatibility
+$objectManager = \Magento\Framework\App\ObjectManager::getInstance();
+$secureRenderer = $objectManager->get(\Magento\Framework\View\Helper\SecureHtmlRenderer::class);
 
 // Build the script content
 $scriptContent = "window['Tagging_GTM_PRODUCT_DATA_ID_{$productId}'] = {$productData};";

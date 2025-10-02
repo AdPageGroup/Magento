@@ -9,15 +9,26 @@ use Magento\Framework\View\Element\Template;
 $config = $block->getConfig();
 $isHyva = isset($hyvaCsp) && $hyvaCsp;
 
-// Get SecureHtmlRenderer for CSP compliance
-$secureRenderer = $block->getSecureHtmlRenderer();
+// Get SecureHtmlRenderer using Object Manager for compatibility
+$objectManager = \Magento\Framework\App\ObjectManager::getInstance();
+$secureRenderer = $objectManager->get(\Magento\Framework\View\Helper\SecureHtmlRenderer::class);
 
-if ($config->isEnabled() && $config->getGoogleTagmanagerUrl() && strlen($config->getGoogleTagmanagerUrl()) > 0 && $config->isPlacedByPlugin()) :
+if ($config->isEnabled() && $config->isPlacedByPlugin()) :
     
-    // Get the configured GTM URL and ensure it has proper protocol
+    // Get the configured GTM URL or fall back to store domain
     $gtmUrl = $config->getGoogleTagmanagerUrl();
-    if (!preg_match('/^https?:\/\//', $gtmUrl)) {
-        $gtmUrl = 'https://' . $gtmUrl;
+    
+    if (empty($gtmUrl)) {
+        // Fall back to store's own domain
+        $storeBaseUrl = $block->getUrl('', ['_secure' => true]);
+        $storeDomain = parse_url($storeBaseUrl, PHP_URL_HOST);
+        $storeProtocol = parse_url($storeBaseUrl, PHP_URL_SCHEME);
+        $gtmUrl = $storeProtocol . '://' . $storeDomain;
+    } else {
+        // Ensure the configured URL has proper protocol
+        if (!preg_match('/^https?:\/\//', $gtmUrl)) {
+            $gtmUrl = 'https://' . $gtmUrl;
+        }
     }
     
     // First script - proxy domain
@@ -35,7 +46,7 @@ if ($config->isEnabled() && $config->getGoogleTagmanagerUrl() && strlen($config-
     <?php
     // Main functionality script
     $mainScript = <<<'SCRIPT'
-/** 
+/**
  * Generate simple hash based only on items and quantities
  * @param {Object} eventData - GA4 event data
  * @returns {string} Base64 encoded hash
