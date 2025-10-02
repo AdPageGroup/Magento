@@ -4,12 +4,11 @@ declare(strict_types=1);
 
 namespace Tagging\GTM\Model\Collector;
 
-use Magento\Csp\Api\Data\PolicyInterface;
-use Magento\Csp\Model\Collector\CollectorInterface;
+use Magento\Csp\Api\PolicyCollectorInterface;
 use Magento\Csp\Model\Policy\FetchPolicy;
 use Tagging\GTM\Config\Config;
 
-class DynamicTaggingCollector implements CollectorInterface
+class DynamicTaggingCollector implements PolicyCollectorInterface
 {
     private Config $config;
 
