@@ -20,8 +20,14 @@ $secureRenderer = $objectManager->get(\Magento\Framework\View\Helper\SecureHtmlR
 
 if ($config->isEnabled() && $config->getGoogleTagmanagerUrl() && strlen($config->getGoogleTagmanagerUrl()) > 0 && $config->isPlacedByPlugin()) :
     
+    // Get the configured GTM URL and ensure it has proper protocol
+    $gtmUrl = $config->getGoogleTagmanagerUrl();
+    if (!preg_match('/^https?:\/\//', $gtmUrl)) {
+        $gtmUrl = 'https://' . $gtmUrl;
+    }
+    
     // First script - proxy domain
-    $proxyScript = "window.tagging_proxy_domain = 'https://" . $config->getGoogleTagmanagerUrl() . "';";
+    $proxyScript = "window.tagging_proxy_domain = '" . $gtmUrl . "';";
     
     if ($isHyva): ?>
         <script><?= $proxyScript ?></script><?php $hyvaCsp->registerInlineScript() ?>
@@ -29,8 +35,8 @@ if ($config->isEnabled() && $config->getGoogleTagmanagerUrl() && strlen($config-
         <script nonce="<?= $nonce ?>"><?= $proxyScript ?></script>
     <?php endif; ?>
     
-    <!-- External script - no CSP needed as it's whitelisted in csp_whitelist.xml -->
-    <script defer src='https://<?= $config->getGoogleTagmanagerUrl() ?>/user-data-minified.es.js'></script>
+    <!-- External script - CSP is now handled dynamically by DynamicTaggingCollector -->
+    <script defer src='<?= $gtmUrl ?>/user-data-minified.es.js'></script>
     
     <?php
     // Main functionality script

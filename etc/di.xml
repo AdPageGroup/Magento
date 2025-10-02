@@ -57,4 +57,15 @@
     <type name="Magento\Sales\Api\OrderRepositoryInterface">
         <plugin name="tagging_gtm_order_repository_plugin" type="Tagging\GTM\Plugin\OrderRepositoryPlugin" />
     </type>
+
+    <!-- Register dynamic CSP collector -->
+    <type name="Magento\Csp\Model\CollectorPool">
+        <arguments>
+            <argument name="collectors" xsi:type="array">
+                <item name="dynamic_tagging_collector" xsi:type="object">
+                    Tagging\GTM\Model\Collector\DynamicTaggingCollector
+                </item>
+            </argument>
+        </arguments>
+    </type>
 </config>
