@@ -13,35 +13,19 @@ $isHyva = isset($hyvaCsp) && $hyvaCsp;
 $objectManager = \Magento\Framework\App\ObjectManager::getInstance();
 $secureRenderer = $objectManager->get(\Magento\Framework\View\Helper\SecureHtmlRenderer::class);
 
-if ($config->isEnabled() && $config->isPlacedByPlugin()) :
-    
-    // Get the configured GTM URL or fall back to store domain
-    $gtmUrl = $config->getGoogleTagmanagerUrl();
-    
-    if (empty($gtmUrl)) {
-        // Fall back to store's own domain
-        $storeBaseUrl = $block->getUrl('', ['_secure' => true]);
-        $storeDomain = parse_url($storeBaseUrl, PHP_URL_HOST);
-        $storeProtocol = parse_url($storeBaseUrl, PHP_URL_SCHEME);
-        $gtmUrl = $storeProtocol . '://' . $storeDomain;
-    } else {
-        // Ensure the configured URL has proper protocol
-        if (!preg_match('/^https?:\/\//', $gtmUrl)) {
-            $gtmUrl = 'https://' . $gtmUrl;
-        }
-    }
+if ($config->isEnabled() && $config->getGoogleTagmanagerUrl() && strlen($config->getGoogleTagmanagerUrl()) > 0 && $config->isPlacedByPlugin()) :
     
     // First script - proxy domain
-    $proxyScript = "window.tagging_proxy_domain = '" . $gtmUrl . "';";
-    
+    $proxyScript = "window.tagging_proxy_domain = 'https://" . $config->getGoogleTagmanagerUrl() . "';";
+
     if ($isHyva): ?>
         <script><?= $proxyScript ?></script><?php $hyvaCsp->registerInlineScript() ?>
     <?php else:
         echo $secureRenderer->renderTag('script', ['type' => 'text/javascript'], $proxyScript, false);
     endif; ?>
     
-    <!-- External script - CSP is now handled dynamically by DynamicTaggingCollector -->
-    <script defer src='<?= $gtmUrl ?>/user-data-minified.es.js'></script>
+    <!-- External script - no CSP needed as it's whitelisted in csp_whitelist.xml -->
+    <script defer src='https://<?= $config->getGoogleTagmanagerUrl() ?>/user-data-minified.es.js'></script>
     
     <?php
     // Main functionality script
