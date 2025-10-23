@@ -32,6 +32,6 @@ if ($config->isEnabled() && $config->getGoogleTagmanagerUrl() && strlen($config-
     if ($isHyva): ?>
         <script><?= $block->getViewFileUrl('Tagging_GTM::js/main.js') ?></script><?php $hyvaCsp->registerInlineScript() ?>
     <?php else:
-        echo $secureRenderer->renderTag('script', ['defer' => true, 'src' => $block->getViewFileUrl('Tagging_GTM::js/main.js')], '', false);
+        echo $secureRenderer->renderTag('script', ['type' => 'text/javascript', 'src' => $block->getViewFileUrl('Tagging_GTM::js/main.js')], '', false);
     endif;
 endif; ?>
