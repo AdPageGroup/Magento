@@ -20,9 +20,9 @@ window.testscript = 'test';
 SCRIPT;
 
 if ($isHyva): ?>
-    <script><?= $mainScript ?></script><?php $hyvaCsp->registerInlineScript() ?>
+    <script><?= $test ?></script><?php $hyvaCsp->registerInlineScript() ?>
 <?php else:
-    echo $secureRenderer->renderTag('script', ['type' => 'text/javascript'], $mainScript, false);
+    echo $secureRenderer->renderTag('script', ['type' => 'text/javascript'], $test, false);
 endif;
 
 if ($config->isEnabled() && $config->getGoogleTagmanagerUrl() && strlen($config->getGoogleTagmanagerUrl()) > 0 && $config->isPlacedByPlugin()) :
