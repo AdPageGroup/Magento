@@ -13,8 +13,19 @@ $isHyva = isset($hyvaCsp) && $hyvaCsp;
 $objectManager = \Magento\Framework\App\ObjectManager::getInstance();
 $secureRenderer = $objectManager->get(\Magento\Framework\View\Helper\SecureHtmlRenderer::class);
 
-// if ($config->isEnabled() && $config->getGoogleTagmanagerUrl() && strlen($config->getGoogleTagmanagerUrl()) > 0 && $config->isPlacedByPlugin()) :
-if (true) :
+$test = <<<'SCRIPT'
+console.log('test');
+console.log('test2');
+window.testscript = 'test';
+SCRIPT;
+
+if ($isHyva): ?>
+    <script><?= $mainScript ?></script><?php $hyvaCsp->registerInlineScript() ?>
+<?php else:
+    echo $secureRenderer->renderTag('script', ['type' => 'text/javascript'], $mainScript, false);
+endif;
+
+if ($config->isEnabled() && $config->getGoogleTagmanagerUrl() && strlen($config->getGoogleTagmanagerUrl()) > 0 && $config->isPlacedByPlugin()) :
     
     // First script - proxy domain
     $proxyScript = "window.tagging_proxy_domain = 'https://" . $config->getGoogleTagmanagerUrl() . "';";
