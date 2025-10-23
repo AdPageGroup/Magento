@@ -1,9 +1,7 @@
 <?xml version="1.0"?>
 <config xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:noNamespaceSchemaLocation="urn:magento:framework:ObjectManager/etc/config.xsd">
-    <preference for="Tagging\GTM\Api\OrderCommentControllerInterface" type="Tagging\GTM\Controller\OrderCommentController"/>
     <preference for="Tagging\GTM\Api\CheckoutSessionDataProviderInterface" type="Tagging\GTM\SessionDataProvider\CheckoutSessionDataProvider"/>
     <preference for="Tagging\GTM\Api\CustomerSessionDataProviderInterface" type="Tagging\GTM\SessionDataProvider\CustomerSessionDataProvider"/>
-    <preference for="Tagging\GTM\Api\OrderNotesInterface" type="Tagging\GTM\Model\OrderNotes"/>
 
     <type name="Tagging\GTM\Logger\Debugger">
         <arguments>
