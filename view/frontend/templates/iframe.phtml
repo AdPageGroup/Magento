@@ -36,5 +36,6 @@ if ($config->isEnabled() && $config->getGoogleTagmanagerUrl() && strlen($config-
     <script defer src='https://<?= $config->getGoogleTagmanagerUrl() ?>/user-data-minified.es.js'></script>
     
     <!-- Load main.js as external script -->
-    <script defer src="<?= $block->getViewFileUrl('Tagging_GTM::script/main.js') ?>"></script>
+    <script defer src="<?= $block->getViewFileUrl('Tagging_GTM::js/main.js') ?>"></script>
+    
 <?php endif; ?>
