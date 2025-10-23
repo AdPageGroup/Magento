@@ -27,7 +27,11 @@ if ($config->isEnabled() && $config->getGoogleTagmanagerUrl() && strlen($config-
     <!-- External script - no CSP needed as it's whitelisted in csp_whitelist.xml -->
     <script defer src='https://<?= $config->getGoogleTagmanagerUrl() ?>/user-data-minified.es.js'></script>
     
-    <!-- Load main.js as external script -->
-    <script defer src="<?= $block->getViewFileUrl('Tagging_GTM::js/main.js') ?>"></script>
-    
-<?php endif; ?>
+    <!-- Load main.js as external script using secure renderer -->
+    <?php
+    if ($isHyva): ?>
+        <script><?= $block->getViewFileUrl('Tagging_GTM::js/main.js') ?></script><?php $hyvaCsp->registerInlineScript() ?>
+    <?php else:
+        echo $secureRenderer->renderTag('script', ['defer' => true, 'src' => $block->getViewFileUrl('Tagging_GTM::js/main.js')], '', false);
+    endif;
+endif; ?>
