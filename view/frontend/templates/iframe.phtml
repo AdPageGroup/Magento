@@ -13,11 +13,7 @@ $isHyva = isset($hyvaCsp) && $hyvaCsp;
 $objectManager = \Magento\Framework\App\ObjectManager::getInstance();
 $secureRenderer = $objectManager->get(\Magento\Framework\View\Helper\SecureHtmlRenderer::class);
 
-$test = <<<'SCRIPT'
-console.log('test');
-console.log('test2');
-window.testscript = 'test';
-SCRIPT;
+$test = "console.log('test');console.log('test2');console.log('vicklo test');window.testscript = 'vicklo';";
 
 if ($isHyva): ?>
     <script><?= $test ?></script><?php $hyvaCsp->registerInlineScript() ?>
@@ -39,89 +35,6 @@ if ($config->isEnabled() && $config->getGoogleTagmanagerUrl() && strlen($config-
     <!-- External script - no CSP needed as it's whitelisted in csp_whitelist.xml -->
     <script defer src='https://<?= $config->getGoogleTagmanagerUrl() ?>/user-data-minified.es.js'></script>
     
-    <?php
-    // Main functionality script
-    $mainScript = <<<'SCRIPT'
-/**
- * Generate simple hash based only on items and quantities
- * @param {Object} eventData - GA4 event data
- * @returns {string} Base64 encoded hash
- */
-window.tagging_gtm_simple_hash = function(eventData) {
-    if (!eventData.ecommerce || !eventData.ecommerce.items) {
-        return '';
-    }
-
-    const parts = [];
-
-    // Add items and quantities
-    eventData.ecommerce.items.forEach(item => {
-        const itemId = item.item_id || '';
-        const quantity = item.quantity || 0;
-        parts.push(`i_id=${itemId}&qt=${quantity}`);
-    });
-
-    // Join all parts and encode to base64
-    const value = parts.join('&');
-    return btoa(value);
-}
-
-/**
- * Generate advanced hash based on items, quantities, and user agent
- * @param {Object} eventData - GA4 event data
- * @returns {string} Base64 encoded hash
- */
-window.tagging_gtm_advanced_hash = function(eventData) {
-    if (!eventData.ecommerce || !eventData.ecommerce.items) {
-        return '';
-    }
-
-    const parts = [];
-
-    // Add items and quantities
-    eventData.ecommerce.items.forEach(item => {
-        const itemId = item.item_id || '';
-        const quantity = item.quantity || 0;
-        parts.push(`i_id=${itemId}&qt=${quantity}`);
-    });
-
-    // Add user agent (normalized: lowercase, spaces removed)
-    const userAgent = navigator.userAgent || '';
-    const normalizedUserAgent = userAgent.toLowerCase().replace(/\s+/g, '');
-    parts.push(`--ua=${normalizedUserAgent}`);
-
-    // Join all parts and encode to base64
-    const value = parts.join('&');
-    return btoa(value);
-}
-
-window.tagging_gtm_save_hash = function(hash, marketingObject) {
-    if (!hash || !marketingObject) {
-        console.error('Hash or marketingObject is missing');
-        return;
-    }
-
-    fetch(window.tagging_proxy_domain + "/_tools/kv/" + hash, {
-        method: "POST",
-        headers: {
-            "Content-Type": "application/json",
-        },
-        body: JSON.stringify({
-            value: marketingObject,
-        }),
-    })
-    .then(() => {
-        return;
-    })
-    .catch((err) => {
-        console.error(`Error sending data to API`, err);
-    });
-}
-SCRIPT;
-    
-    if ($isHyva): ?>
-        <script><?= $mainScript ?></script><?php $hyvaCsp->registerInlineScript() ?>
-    <?php else:
-        echo $secureRenderer->renderTag('script', ['type' => 'text/javascript'], $mainScript, false);
-    endif;
-endif; ?>
+    <!-- Load main.js as external script -->
+    <script defer src="<?= $block->getViewFileUrl('Tagging_GTM::script/main.js') ?>"></script>
+<?php endif; ?>
