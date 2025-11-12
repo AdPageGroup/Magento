@@ -3,7 +3,7 @@
     <body>
         <referenceContainer name="main">
             <block template="Tagging_GTM::hyva_checkout/data-layer.phtml"
-                   ifconfig="googletagmanager2/settings/enabled">
+                   ifconfig="GTM/settings/enabled">
                 <arguments>
                     <argument name="magewire" xsi:type="object">Tagging\GTM\MageWire\Checkout</argument>
                     <argument name="begin_checkout_event" xsi:type="object">Tagging\GTM\DataLayer\Event\BeginCheckout</argument>
