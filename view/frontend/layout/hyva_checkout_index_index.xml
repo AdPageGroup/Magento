@@ -1,9 +1,11 @@
 <?xml version="1.0"?>
 <page xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:noNamespaceSchemaLocation="urn:magento:framework:View/Layout/etc/page_configuration.xsd">
     <body>
-        <referenceContainer name="main">
-            <block template="Tagging_GTM::hyva_checkout/data-layer.phtml"
-                   ifconfig="GTM/settings/enabled">
+        <referenceContainer name="Tagging_GTM.data-layer.container">
+            <block name="yireo_googletagmanager2.hyva_checkout.data-layer.component"
+                   template="Tagging_GTM::hyva_checkout/data-layer.phtml"
+                   ifconfig="GTM/settings/enabled"
+                   after="Tagging_GTM.data-layer">
                 <arguments>
                     <argument name="magewire" xsi:type="object">Tagging\GTM\MageWire\Checkout</argument>
                     <argument name="begin_checkout_event" xsi:type="object">Tagging\GTM\DataLayer\Event\BeginCheckout</argument>
