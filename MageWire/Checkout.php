@@ -10,10 +10,6 @@ use Tagging\GTM\DataLayer\Event\BeginCheckout;
 
 class Checkout extends Component
 {
-    protected $listeners = [
-        'shipping_method_selected' => 'triggerShippingMethod',
-        'payment_method_selected' => 'triggerPaymentMethod',
-    ];
     private CheckoutSession $checkoutSession;
     private BeginCheckout $beginCheckout;
     private AddShippingInfo $addShippingInfo;
@@ -29,6 +25,17 @@ class Checkout extends Component
         $this->beginCheckout = $beginCheckout;
         $this->addShippingInfo = $addShippingInfo;
         $this->addPaymentInfo = $addPaymentInfo;
+    }
+
+    public function boot(): void
+    {
+        $parent = get_parent_class($this);
+        if ($parent && method_exists($parent, 'boot')) {
+            parent::boot();
+        }
+
+        $this->listeners['shipping_method_selected'] = 'triggerShippingMethod';
+        $this->listeners['payment_method_selected'] = 'triggerPaymentMethod';
     }
 
     public function triggerBeginCheckout()
