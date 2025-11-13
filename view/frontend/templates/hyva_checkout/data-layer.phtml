@@ -14,26 +14,18 @@ if (false === $magewire->isHyvaCheckoutEnabled()) {
 }
 
 $beginCheckoutEvent = $block->getData('begin_checkout_event');
+$beginCheckoutPayload = $beginCheckoutEvent->get();
 ?>
-<div>
+<div class="hidden">
     <script>
-        function initYireoGoogleTagManagerInHyvaCheckout() {
+        (function () {
             "use strict";
 
-            function triggerEvent(event) {
+            window.addEventListener('ga:trigger-event', function (event) {
                 googleTagManager2Pusher(event.detail, 'Hyva Checkout');
-            }
+            }, {passive: true});
 
-            triggerEvent(new CustomEvent('ga:trigger-event', {detail: <?= json_encode($beginCheckoutEvent->get()) ?>}));
-
-            return {
-                triggerEvent
-            }
-        }
+            googleTagManager2Pusher(<?= /* @noEscape */ json_encode($beginCheckoutPayload) ?>, 'Hyva Checkout');
+        })();
     </script><?php if (isset($hyvaCsp) && $hyvaCsp): ?><?php $hyvaCsp->registerInlineScript() ?><?php endif; ?>
-    <div id="ga-trigger"
-         x-data="initYireoGoogleTagManagerInHyvaCheckout()"
-         class="hidden"
-         @ga:trigger-event.window="triggerEvent($event)"
-    ></div>
 </div>
