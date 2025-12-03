@@ -236,6 +236,16 @@ class Config implements ArgumentInterface
     }
 
     /**
+     * Check if purchase event should only trigger on paid orders
+     *
+     * @return bool
+     */
+    public function isPurchaseEventPaymentCheckEnabled(): bool
+    {
+        return (bool)$this->getModuleConfigValueAdvanced('purchase_event_payment_check', false);
+    }
+
+    /**
      * @return bool
      */
     private function isDeveloperMode(): bool

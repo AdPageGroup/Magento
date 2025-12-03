@@ -6,6 +6,7 @@ use Magento\Framework\Event\Observer;
 use Magento\Framework\Event\ObserverInterface;
 use Magento\Sales\Api\Data\OrderInterface;
 use Tagging\GTM\Api\CheckoutSessionDataProviderInterface;
+use Tagging\GTM\Config\Config;
 use Tagging\GTM\DataLayer\Event\Purchase as PurchaseEvent;
 use Tagging\GTM\Logger\Debugger;
 use Exception;
@@ -15,15 +16,18 @@ class TriggerPurchaseDataLayerEvent implements ObserverInterface
     private CheckoutSessionDataProviderInterface $checkoutSessionDataProvider;
     private PurchaseEvent $purchaseEvent;
     private Debugger $debugger;
+    private Config $config;
 
     public function __construct(
         CheckoutSessionDataProviderInterface $checkoutSessionDataProvider,
         PurchaseEvent $purchaseEvent,
-        Debugger $debugger
+        Debugger $debugger,
+        Config $config
     ) {
         $this->checkoutSessionDataProvider = $checkoutSessionDataProvider;
         $this->purchaseEvent = $purchaseEvent;
         $this->debugger = $debugger;
+        $this->config = $config;
     }
 
     public function execute(Observer $observer)
@@ -31,10 +35,75 @@ class TriggerPurchaseDataLayerEvent implements ObserverInterface
         /** @var OrderInterface $order */
         $order = $observer->getData('order');
 
-        $this->debugger->debug("TriggerPurchaseDataLayerEvent::execute(): has changed ");
+        $this->debugger->debug('TriggerPurchaseDataLayerEvent::execute(): Purchase event triggered');
+        $this->debugger->debug('TriggerPurchaseDataLayerEvent::execute(): order_id: ' . $order->getId());
+        $this->debugger->debug('TriggerPurchaseDataLayerEvent::execute(): order_increment_id: ' . $order->getIncrementId());
+        $this->debugger->debug('TriggerPurchaseDataLayerEvent::execute(): order_status: ' . $order->getStatus());
+        $this->debugger->debug('TriggerPurchaseDataLayerEvent::execute(): order_state: ' . $order->getState());
+        $this->debugger->debug('TriggerPurchaseDataLayerEvent::execute(): order_grand_total: ' . $order->getGrandTotal());
+        $this->debugger->debug('TriggerPurchaseDataLayerEvent::execute(): order_total_paid: ' . $order->getTotalPaid());
+        $this->debugger->debug('TriggerPurchaseDataLayerEvent::execute(): order_total_due: ' . $order->getTotalDue());
+
+        // Check if payment check is enabled
+        $paymentCheckEnabled = $this->config->isPurchaseEventPaymentCheckEnabled();
+        $this->debugger->debug('TriggerPurchaseDataLayerEvent::execute(): payment_check_enabled: ' . ($paymentCheckEnabled ? 'true' : 'false'));
+
+        if ($paymentCheckEnabled) {
+            if (!$this->shouldTriggerPurchaseEvent($order)) {
+                $this->debugger->debug('TriggerPurchaseDataLayerEvent::execute(): Payment check failed - order is not fully paid, skipping purchase event');
+                return;
+            }
+            $this->debugger->debug('TriggerPurchaseDataLayerEvent::execute(): Payment check passed - order is fully paid, sending purchase event');
+        } else {
+            $this->debugger->debug('TriggerPurchaseDataLayerEvent::execute(): Payment check disabled - sending purchase event without payment verification');
+        }
+
         $this->checkoutSessionDataProvider->add(
             'purchase_event',
             $this->purchaseEvent->setOrder($order)->get()
         );
+        
+        $this->debugger->debug('TriggerPurchaseDataLayerEvent::execute(): Purchase event added to checkout session');
+    }
+
+    /**
+     * Check if purchase event should be triggered based on payment status
+     *
+     * @param OrderInterface $order
+     * @return bool
+     */
+    private function shouldTriggerPurchaseEvent(OrderInterface $order): bool
+    {
+        $grandTotal = (float)$order->getGrandTotal();
+        $totalPaid = (float)$order->getTotalPaid();
+        $tolerance = 0.01; // Tolerance for floating point comparison
+
+        $this->debugger->debug('TriggerPurchaseDataLayerEvent::shouldTriggerPurchaseEvent(): grand_total: ' . $grandTotal);
+        $this->debugger->debug('TriggerPurchaseDataLayerEvent::shouldTriggerPurchaseEvent(): total_paid: ' . $totalPaid);
+        $this->debugger->debug('TriggerPurchaseDataLayerEvent::shouldTriggerPurchaseEvent(): difference: ' . abs($grandTotal - $totalPaid));
+        $this->debugger->debug('TriggerPurchaseDataLayerEvent::shouldTriggerPurchaseEvent(): tolerance: ' . $tolerance);
+
+        // Check if order is fully paid (with tolerance)
+        $isFullyPaid = abs($grandTotal - $totalPaid) <= $tolerance;
+        
+        if ($isFullyPaid) {
+            $this->debugger->debug('TriggerPurchaseDataLayerEvent::shouldTriggerPurchaseEvent(): Order is fully paid');
+            
+            // Additional check: order should be in a paid state
+            $paidStates = ['processing', 'complete'];
+            $orderState = $order->getState();
+            $this->debugger->debug('TriggerPurchaseDataLayerEvent::shouldTriggerPurchaseEvent(): order_state: ' . $orderState);
+            
+            if (in_array($orderState, $paidStates)) {
+                $this->debugger->debug('TriggerPurchaseDataLayerEvent::shouldTriggerPurchaseEvent(): Order state is in paid states, purchase event will be sent');
+                return true;
+            } else {
+                $this->debugger->debug('TriggerPurchaseDataLayerEvent::shouldTriggerPurchaseEvent(): Order state is not in paid states, but order is fully paid - purchase event will be sent');
+                return true;
+            }
+        }
+
+        $this->debugger->debug('TriggerPurchaseDataLayerEvent::shouldTriggerPurchaseEvent(): Order is not fully paid, purchase event will not be sent');
+        return false;
     }
 }

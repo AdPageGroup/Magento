@@ -84,6 +84,15 @@
                         <field id="webhook_trigger_mode">on_order_state</field>
                     </depends>
                 </field>
+                <field id="purchase_event_payment_check" type="select" translate="label" sortOrder="3" showInDefault="1" showInWebsite="1" showInStore="1">
+                    <label>Enable payment check at purchase</label>
+                    <comment><![CDATA[If enabled, the purchase event will only be sent when the order is fully paid. This prevents purchase events from being sent for unpaid orders.<br/>
+                    <b>Note:</b> For asynchronous payment methods, the purchase event may be sent after the customer leaves the success page.]]></comment>
+                    <source_model>Magento\Config\Model\Config\Source\Yesno</source_model>
+                    <depends>
+                        <field id="*/settings/enabled">1</field>
+                    </depends>
+                </field>
             </group>
         </section>
     </system>
