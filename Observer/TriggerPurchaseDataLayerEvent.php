@@ -2,6 +2,7 @@
 
 namespace Tagging\GTM\Observer;
 
+use Magento\Framework\App\RequestInterface;
 use Magento\Framework\Event\Observer;
 use Magento\Framework\Event\ObserverInterface;
 use Magento\Sales\Api\Data\OrderInterface;
@@ -17,17 +18,20 @@ class TriggerPurchaseDataLayerEvent implements ObserverInterface
     private PurchaseEvent $purchaseEvent;
     private Debugger $debugger;
     private Config $config;
+    private RequestInterface $request;
 
     public function __construct(
         CheckoutSessionDataProviderInterface $checkoutSessionDataProvider,
         PurchaseEvent $purchaseEvent,
         Debugger $debugger,
-        Config $config
+        Config $config,
+        RequestInterface $request
     ) {
         $this->checkoutSessionDataProvider = $checkoutSessionDataProvider;
         $this->purchaseEvent = $purchaseEvent;
         $this->debugger = $debugger;
         $this->config = $config;
+        $this->request = $request;
     }
 
     public function execute(Observer $observer)
@@ -35,7 +39,19 @@ class TriggerPurchaseDataLayerEvent implements ObserverInterface
         /** @var OrderInterface $order */
         $order = $observer->getData('order');
 
+        // Get page information
+        $fullActionName = $this->request->getFullActionName();
+        $requestUri = $this->request->getRequestUri();
+        $moduleName = $this->request->getModuleName();
+        $controllerName = $this->request->getControllerName();
+        $actionName = $this->request->getActionName();
+
         $this->debugger->debug('TriggerPurchaseDataLayerEvent::execute(): Purchase event triggered');
+        $this->debugger->debug('TriggerPurchaseDataLayerEvent::execute(): page_full_action_name: ' . $fullActionName);
+        $this->debugger->debug('TriggerPurchaseDataLayerEvent::execute(): page_module: ' . $moduleName);
+        $this->debugger->debug('TriggerPurchaseDataLayerEvent::execute(): page_controller: ' . $controllerName);
+        $this->debugger->debug('TriggerPurchaseDataLayerEvent::execute(): page_action: ' . $actionName);
+        $this->debugger->debug('TriggerPurchaseDataLayerEvent::execute(): page_request_uri: ' . $requestUri);
         $this->debugger->debug('TriggerPurchaseDataLayerEvent::execute(): order_id: ' . $order->getId());
         $this->debugger->debug('TriggerPurchaseDataLayerEvent::execute(): order_increment_id: ' . $order->getIncrementId());
         $this->debugger->debug('TriggerPurchaseDataLayerEvent::execute(): order_status: ' . $order->getStatus());
