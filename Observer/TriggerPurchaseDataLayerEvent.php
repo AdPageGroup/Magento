@@ -60,6 +60,21 @@ class TriggerPurchaseDataLayerEvent implements ObserverInterface
         $this->debugger->debug('TriggerPurchaseDataLayerEvent::execute(): order_total_paid: ' . $order->getTotalPaid());
         $this->debugger->debug('TriggerPurchaseDataLayerEvent::execute(): order_total_due: ' . $order->getTotalDue());
 
+        // Check if page-specific checking is enabled
+        $pageCheckEnabled = $this->config->isPurchaseEventPageCheckEnabled();
+        $this->debugger->debug('TriggerPurchaseDataLayerEvent::execute(): page_check_enabled: ' . ($pageCheckEnabled ? 'true' : 'false'));
+
+        // If page check is enabled, validate we're on an allowed checkout page
+        if ($pageCheckEnabled) {
+            if (!$this->isCheckoutPage()) {
+                $this->debugger->debug('TriggerPurchaseDataLayerEvent::execute(): Not on an allowed checkout page, skipping purchase event');
+                return;
+            }
+            $this->debugger->debug('TriggerPurchaseDataLayerEvent::execute(): On allowed checkout page, proceeding with purchase event');
+        } else {
+            $this->debugger->debug('TriggerPurchaseDataLayerEvent::execute(): Page check disabled - purchase event will fire from any page');
+        }
+
         // Check if payment check is enabled
         $paymentCheckEnabled = $this->config->isPurchaseEventPaymentCheckEnabled();
         $this->debugger->debug('TriggerPurchaseDataLayerEvent::execute(): payment_check_enabled: ' . ($paymentCheckEnabled ? 'true' : 'false'));
@@ -121,5 +136,30 @@ class TriggerPurchaseDataLayerEvent implements ObserverInterface
 
         $this->debugger->debug('TriggerPurchaseDataLayerEvent::shouldTriggerPurchaseEvent(): Order is not fully paid, purchase event will not be sent');
         return false;
+    }
+
+    /**
+     * Check if the current request is on a checkout page
+     *
+     * @return bool
+     */
+    private function isCheckoutPage(): bool
+    {
+        $fullActionName = $this->request->getFullActionName();
+        $moduleName = $this->request->getModuleName();
+        
+        // Check if we're in the checkout module
+        if ($moduleName !== 'checkout') {
+            return false;
+        }
+        
+        // Get allowed checkout actions from configuration
+        // This will return all available actions if none are configured (default behavior)
+        $allowedActions = $this->config->getPurchaseEventAllowedCheckoutActions();
+        
+        $this->debugger->debug('TriggerPurchaseDataLayerEvent::isCheckoutPage(): Allowed actions: ' . implode(', ', $allowedActions));
+        $this->debugger->debug('TriggerPurchaseDataLayerEvent::isCheckoutPage(): Current action: ' . $fullActionName);
+        
+        return in_array($fullActionName, $allowedActions, true);
     }
 }
