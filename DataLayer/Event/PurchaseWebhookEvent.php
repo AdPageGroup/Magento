@@ -82,7 +82,7 @@ class PurchaseWebhookEvent
         }
 
         $data = [
-            'event' => 'trytagging_purchase',
+            'event' => 'trytagging_purchase4',
             'marketing' => $marketingData,
             'store_domain' => $this->config->getStoreDomain(),
             'plugin_version' => $this->config->getVersion(),

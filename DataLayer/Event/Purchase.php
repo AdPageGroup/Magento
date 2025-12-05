@@ -32,7 +32,7 @@ class Purchase implements EventInterface
     {
         $order = $this->order;
         return [
-            'event' => 'trytagging_purchase',
+            'event' => 'trytagging_purchase3',
             'ecommerce' => [
                 'transaction_id' => $order->getIncrementId(),
                 'affiliation' => $this->config->getStoreName(),
