@@ -84,6 +84,14 @@
                         <field id="webhook_trigger_mode">on_order_state</field>
                     </depends>
                 </field>
+                <field id="disable_purchase_session_storage" type="select" translate="label" sortOrder="3" showInDefault="1" showInWebsite="1" showInStore="1">
+                    <label>Disable purchase session storage</label>
+                    <comment>When enabled, purchase events are not stored in checkout session (prevents pushes on non-success pages after failed/aborted payments).</comment>
+                    <source_model>Magento\Config\Model\Config\Source\Yesno</source_model>
+                    <depends>
+                        <field id="*/settings/enabled">1</field>
+                    </depends>
+                </field>
             </group>
         </section>
     </system>
