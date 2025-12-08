@@ -24,6 +24,7 @@
                             <item name="order" xsi:type="object">Tagging\GTM\DataLayer\Tag\Order\Order</item>
                             <item name="items" xsi:type="object">Tagging\GTM\DataLayer\Tag\Order\OrderItems</item>
                         </item>
+                        <item name="user_data" xsi:type="object">Tagging\GTM\DataLayer\Tag\Order\UserData</item>
                     </item>
                 </argument>
 

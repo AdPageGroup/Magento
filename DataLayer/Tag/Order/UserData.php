@@ -2,59 +2,32 @@
 
 declare(strict_types=1);
 
-namespace Tagging\GTM\DataLayer\Event;
+namespace Tagging\GTM\DataLayer\Tag\Order;
 
+use Magento\Checkout\Model\Session as CheckoutSession;
 use Magento\Sales\Api\Data\OrderInterface;
-use Tagging\GTM\Api\Data\EventInterface;
-use Tagging\GTM\Config\Config;
-use Tagging\GTM\DataLayer\Tag\Order\OrderItems;
-use Tagging\GTM\Util\PriceFormatter;
+use Magento\Sales\Api\OrderRepositoryInterface;
+use Tagging\GTM\Api\Data\TagInterface;
 
-class Purchase implements EventInterface
+class UserData implements TagInterface
 {
-    private ?OrderInterface $order = null;
-    private OrderItems $orderItems;
-    private Config $config;
-    private PriceFormatter $priceFormatter;
+    private CheckoutSession $checkoutSession;
+    private OrderRepositoryInterface $orderRepository;
 
     public function __construct(
-        OrderItems $orderItems,
-        Config $config,
-        PriceFormatter $priceFormatter
+        CheckoutSession $checkoutSession,
+        OrderRepositoryInterface $orderRepository
     ) {
-        $this->orderItems = $orderItems;
-        $this->config = $config;
-        $this->priceFormatter = $priceFormatter;
+        $this->checkoutSession = $checkoutSession;
+        $this->orderRepository = $orderRepository;
     }
 
     /**
-     * @return string[]
+     * @return array
      */
     public function get(): array
     {
-        $order = $this->order;
-        return [
-            'event' => 'trytagging_purchase',
-            'ecommerce' => [
-                'transaction_id' => $order->getIncrementId(),
-                'affiliation' => $this->config->getStoreName(),
-                'currency' => $order->getOrderCurrencyCode(),
-                'value' => $this->priceFormatter->format((float)$order->getGrandTotal()),
-                'tax' => $this->priceFormatter->format((float)$order->getTaxAmount()),
-                'shipping' => $this->priceFormatter->format((float)$order->getShippingInclTax()),
-                'coupon' => $order->getCouponCode(),
-                'items' => $this->orderItems->setOrder($order)->get()
-            ],
-            'user_data' => $this->getUserData($order)
-        ];
-    }
-
-    /**
-     * @param OrderInterface $order
-     * @return array
-     */
-    private function getUserData(OrderInterface $order): array
-    {
+        $order = $this->getOrder();
         $billingAddress = $order->getBillingAddress();
         $shippingAddress = $order->getShippingAddress();
 
@@ -86,12 +59,10 @@ class Purchase implements EventInterface
     }
 
     /**
-     * @param OrderInterface $order
-     * @return Purchase
+     * @return OrderInterface
      */
-    public function setOrder(OrderInterface $order): Purchase
+    private function getOrder(): OrderInterface
     {
-        $this->order = $order;
-        return $this;
+        return $this->orderRepository->get($this->checkoutSession->getLastRealOrder()->getId());
     }
 }
