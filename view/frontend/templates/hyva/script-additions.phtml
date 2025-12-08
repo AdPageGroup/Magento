@@ -34,11 +34,11 @@ $commons = $block->getCommonsViewModel();
         }
 
         var getSectionNames = function() {
-            return ['cart', 'customer'];
+            return ['cart', 'customer', 'gtm-checkout'];
         }
 
         getSectionNames().forEach(function(sectionName) {
-            if (!event.detail.data[sectionName].gtm) {
+            if (!event.detail.data[sectionName] || !event.detail.data[sectionName].gtm) {
                 return;
             }
 
@@ -52,7 +52,7 @@ $commons = $block->getCommonsViewModel();
 
         let attributes = {};
         getSectionNames().forEach(function(sectionName) {
-            if (!event.detail.data[sectionName].gtm_events) {
+            if (!event.detail.data[sectionName] || !event.detail.data[sectionName].gtm_events) {
                 return;
             }
 
