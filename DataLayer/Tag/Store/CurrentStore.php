@@ -9,14 +9,11 @@ use Magento\Store\Model\StoreManagerInterface;
 
 class CurrentStore implements TagInterface
 {
-    private $storeManager;
-
-    public function __construct(
-        StoreManagerInterface $storeManager
-    ) {
-        $this->storeManager = $storeManager;
+    public function __construct(private readonly StoreManagerInterface $storeManager)
+    {
     }
 
+    #[\Override]
     public function get(): array
     {
         try {
@@ -26,7 +23,7 @@ class CurrentStore implements TagInterface
                 'website_id' => $this->storeManager->getStore()->getWebsiteId(),
                 'url' => $this->storeManager->getStore()->getCurrentUrl(),
             ];
-        } catch (\Exception $e) {
+        } catch (\Exception) {
             return [
                 'code' => null,
                 'name' => null,

@@ -8,17 +8,11 @@ use Tagging\GTM\Logger\Debugger;
 
 class CustomerSessionDataProvider implements CustomerSessionDataProviderInterface
 {
-    private CustomerSession $customerSession;
-    private Debugger $debugger;
-
-    public function __construct(
-        CustomerSession $customerSession,
-        Debugger $debugger
-    ) {
-        $this->customerSession = $customerSession;
-        $this->debugger = $debugger;
+    public function __construct(private readonly CustomerSession $customerSession, private readonly Debugger $debugger)
+    {
     }
 
+    #[\Override]
     public function add(string $identifier, array $data)
     {
         $gtmData = $this->get();
@@ -27,6 +21,7 @@ class CustomerSessionDataProvider implements CustomerSessionDataProviderInterfac
         $this->customerSession->setYireoGtmData($gtmData);
     }
 
+    #[\Override]
     public function get(): array
     {
         $gtmData = $this->customerSession->getYireoGtmData();
@@ -37,6 +32,7 @@ class CustomerSessionDataProvider implements CustomerSessionDataProviderInterfac
         return [];
     }
 
+    #[\Override]
     public function clear()
     {
         $this->customerSession->setYireoGtmData([]);

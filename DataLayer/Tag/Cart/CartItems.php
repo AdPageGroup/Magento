@@ -12,30 +12,21 @@ use Tagging\GTM\Util\ProductProvider;
 
 class CartItems implements TagInterface
 {
-    private CartModel $cartModel;
-    private CartItemDataMapper $cartItemDataMapper;
-    private ProductProvider $productProvider;
-
     /**
      * @param CartModel $cartModel
      * @param CartItemDataMapper $cartItemDataMapper
      * @throws NoSuchEntityException
      * @throws LocalizedException
      */
-    public function __construct(
-        CartModel $cartModel,
-        CartItemDataMapper $cartItemDataMapper,
-        ProductProvider $productProvider
-    ) {
-        $this->cartModel = $cartModel;
-        $this->cartItemDataMapper = $cartItemDataMapper;
-        $this->productProvider = $productProvider;
+    public function __construct(private readonly CartModel $cartModel, private readonly CartItemDataMapper $cartItemDataMapper, private readonly ProductProvider $productProvider)
+    {
     }
 
     /**
      * @return array
      * @throws NoSuchEntityException
      */
+    #[\Override]
     public function get(): array
     {
         $cartItems = $this->cartModel->getQuote()->getAllVisibleItems();

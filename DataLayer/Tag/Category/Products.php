@@ -10,29 +10,20 @@ use Tagging\GTM\DataLayer\Mapper\ProductDataMapper;
 
 class Products implements TagInterface
 {
-    private GetCurrentCategoryProducts $getCurrentCategoryProducts;
-    private GetCurrentCategory $getCurrentCategory;
-    private ProductDataMapper $productDataMapper;
-
     /**
      * @param GetCurrentCategoryProducts $getCurrentCategoryProducts
      * @param GetCurrentCategory $getCurrentCategory
      * @param ProductDataMapper $productDataMapper
      */
-    public function __construct(
-        GetCurrentCategoryProducts $getCurrentCategoryProducts,
-        GetCurrentCategory $getCurrentCategory,
-        ProductDataMapper $productDataMapper
-    ) {
-        $this->getCurrentCategoryProducts = $getCurrentCategoryProducts;
-        $this->getCurrentCategory = $getCurrentCategory;
-        $this->productDataMapper = $productDataMapper;
+    public function __construct(private readonly GetCurrentCategoryProducts $getCurrentCategoryProducts, private readonly GetCurrentCategory $getCurrentCategory, private readonly ProductDataMapper $productDataMapper)
+    {
     }
 
     /**
      * @return array
      * @throws NoSuchEntityException
      */
+    #[\Override]
     public function get(): array
     {
         $productsData = [];

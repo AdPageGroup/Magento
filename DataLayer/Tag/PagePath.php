@@ -7,14 +7,11 @@ use Tagging\GTM\Api\Data\TagInterface;
 
 class PagePath implements TagInterface
 {
-    private UrlInterface $url;
-
-    public function __construct(
-        UrlInterface $url
-    ) {
-        $this->url = $url;
+    public function __construct(private readonly UrlInterface $url)
+    {
     }
 
+    #[\Override]
     public function get(): string
     {
         return $this->url->getCurrentUrl();

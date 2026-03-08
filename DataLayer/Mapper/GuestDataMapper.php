@@ -9,19 +9,12 @@ use Tagging\GTM\Util\Attribute\GetAttributeValue;
 
 class GuestDataMapper
 {
-    private Config $config;
-    private GetAttributeValue $getAttributeValue;
-
     /**
      * @param Config $config
      * @param GetAttributeValue $getAttributeValue
      */
-    public function __construct(
-        Config $config,
-        GetAttributeValue $getAttributeValue
-    ) {
-        $this->config = $config;
-        $this->getAttributeValue = $getAttributeValue;
+    public function __construct(private readonly Config $config, private readonly GetAttributeValue $getAttributeValue)
+    {
     }
 
     /**

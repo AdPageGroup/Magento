@@ -7,14 +7,11 @@ use Tagging\GTM\Config\XmlConfig;
 
 class Base implements ProcessorInterface
 {
-    private XmlConfig $xmlConfig;
-
-    public function __construct(
-        XmlConfig $xmlConfig
-    ) {
-        $this->xmlConfig = $xmlConfig;
+    public function __construct(private readonly XmlConfig $xmlConfig)
+    {
     }
 
+    #[\Override]
     public function process(array $data): array
     {
         $default = $this->xmlConfig->getDefault();

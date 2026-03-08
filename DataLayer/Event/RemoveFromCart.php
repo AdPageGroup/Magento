@@ -8,20 +8,19 @@ use Tagging\GTM\DataLayer\Mapper\CartItemDataMapper;
 
 class RemoveFromCart implements EventInterface
 {
-    private CartItemDataMapper $cartItemDataMapper;
     private CartItemInterface $cartItem;
 
     /**
      * @param CartItemDataMapper $cartItemDataMapper
      */
-    public function __construct(CartItemDataMapper $cartItemDataMapper)
+    public function __construct(private readonly CartItemDataMapper $cartItemDataMapper)
     {
-        $this->cartItemDataMapper = $cartItemDataMapper;
     }
 
     /**
      * @return array
      */
+    #[\Override]
     public function get(): array
     {
         $cartItemData = $this->cartItemDataMapper->mapByCartItem($this->cartItem);

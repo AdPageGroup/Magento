@@ -39,14 +39,14 @@ class GetCategoryPath
         }
 
         $categoryPath = $category->getPath();
-        $categoryIdArray = explode('/', $categoryPath);
+        $categoryIdArray = explode('/', (string) $categoryPath);
         $categoryNames = [];
 
         foreach ($categoryIdArray as $categoryId) {
             if (!in_array($categoryId, self::ROOT_CATEGORY_IDS)) {
                 try {
                     $category = $this->categoryRepository->get($categoryId);
-                } catch (NoSuchEntityException $e) {
+                } catch (NoSuchEntityException) {
                     continue;
                 }
                 $categoryNames[] = $category->getName();

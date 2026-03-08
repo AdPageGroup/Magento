@@ -10,21 +10,15 @@ use Tagging\GTM\Api\Data\MergeTagInterface;
 
 class EnhancedConversions implements MergeTagInterface
 {
-    private CheckoutSession $checkoutSession;
-    private OrderRepositoryInterface $orderRepository;
-
     /**
      * @param CheckoutSession $checkoutSession
      * @param OrderRepositoryInterface $orderRepository
      */
-    public function __construct(
-        CheckoutSession $checkoutSession,
-        OrderRepositoryInterface $orderRepository
-    ) {
-        $this->checkoutSession = $checkoutSession;
-        $this->orderRepository = $orderRepository;
+    public function __construct(private readonly CheckoutSession $checkoutSession, private readonly OrderRepositoryInterface $orderRepository)
+    {
     }
 
+    #[\Override]
     public function merge(): array
     {
         return [

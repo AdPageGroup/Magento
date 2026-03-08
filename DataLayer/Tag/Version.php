@@ -7,17 +7,14 @@ use Tagging\GTM\Api\Data\TagInterface;
 
 class Version implements TagInterface
 {
-    private ComponentRegistrar $composerRegistrar;
-
     /**
      * @param ComponentRegistrar $composerRegistrar
      */
-    public function __construct(
-        ComponentRegistrar $composerRegistrar
-    ) {
-        $this->composerRegistrar = $composerRegistrar;
+    public function __construct(private readonly ComponentRegistrar $composerRegistrar)
+    {
     }
 
+    #[\Override]
     public function get(): string
     {
         $path = $this->composerRegistrar->getPath('module', 'Tagging_GTM');

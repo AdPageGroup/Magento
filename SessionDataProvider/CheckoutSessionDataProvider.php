@@ -8,14 +8,11 @@ use Tagging\GTM\Api\CheckoutSessionDataProviderInterface;
 
 class CheckoutSessionDataProvider implements CheckoutSessionDataProviderInterface
 {
-    private CheckoutSession $checkoutSession;
-
-    public function __construct(
-        CheckoutSession $checkoutSession
-    ) {
-        $this->checkoutSession = $checkoutSession;
+    public function __construct(private readonly CheckoutSession $checkoutSession)
+    {
     }
     
+    #[\Override]
     public function add(string $identifier, array $data)
     {
         $gtmData = $this->get();
@@ -23,6 +20,7 @@ class CheckoutSessionDataProvider implements CheckoutSessionDataProviderInterfac
         $this->checkoutSession->setYireoGtmData($gtmData);
     }
     
+    #[\Override]
     public function get(): array
     {
         $gtmData = $this->checkoutSession->getYireoGtmData();
@@ -33,6 +31,7 @@ class CheckoutSessionDataProvider implements CheckoutSessionDataProviderInterfac
         return [];
     }
     
+    #[\Override]
     public function clear()
     {
         $this->checkoutSession->setYireoGtmData([]);

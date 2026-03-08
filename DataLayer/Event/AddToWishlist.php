@@ -10,16 +10,13 @@ use Tagging\GTM\DataLayer\Mapper\ProductDataMapper;
 
 class AddToWishlist implements EventInterface
 {
-    private ProductDataMapper $productDataMapper;
     private ProductInterface $product;
 
     /**
      * @param ProductDataMapper $productDataMapper
      */
-    public function __construct(
-        ProductDataMapper $productDataMapper
-    ) {
-        $this->productDataMapper = $productDataMapper;
+    public function __construct(private readonly ProductDataMapper $productDataMapper)
+    {
     }
 
     /**
@@ -27,6 +24,7 @@ class AddToWishlist implements EventInterface
      * @throws LocalizedException
      * @throws NoSuchEntityException
      */
+    #[\Override]
     public function get(): array
     {
         $itemData = $this->productDataMapper->mapByProduct($this->product);

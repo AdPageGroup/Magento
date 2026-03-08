@@ -11,18 +11,8 @@ use Tagging\GTM\DataLayer\Event\AddPaymentInfo;
 
 class TriggerAddGuestPaymentInfoDataLayerEvent
 {
-    private CheckoutSessionDataProviderInterface $checkoutSessionDataProvider;
-    private AddPaymentInfo $addPaymentInfo;
-    private MaskedQuoteIdToQuoteIdInterface $maskedQuoteIdToQuoteId;
-
-    public function __construct(
-        CheckoutSessionDataProviderInterface $checkoutSessionDataProvider,
-        AddPaymentInfo $addPaymentInfo,
-        MaskedQuoteIdToQuoteIdInterface $maskedQuoteIdToQuoteId
-    ) {
-        $this->checkoutSessionDataProvider = $checkoutSessionDataProvider;
-        $this->addPaymentInfo = $addPaymentInfo;
-        $this->maskedQuoteIdToQuoteId = $maskedQuoteIdToQuoteId;
+    public function __construct(private readonly CheckoutSessionDataProviderInterface $checkoutSessionDataProvider, private readonly AddPaymentInfo $addPaymentInfo, private readonly MaskedQuoteIdToQuoteIdInterface $maskedQuoteIdToQuoteId)
+    {
     }
 
     public function afterSavePaymentInformationAndPlaceOrder(
@@ -31,7 +21,7 @@ class TriggerAddGuestPaymentInfoDataLayerEvent
         $cartId,
         $email,
         PaymentInterface $paymentMethod,
-        AddressInterface $billingAddress = null
+        ?AddressInterface $billingAddress = null
     ) {
         $cartId = $this->maskedQuoteIdToQuoteId->execute($cartId);
         $addPaymentInfoEventData = $this->addPaymentInfo
@@ -49,7 +39,7 @@ class TriggerAddGuestPaymentInfoDataLayerEvent
         $cartId,
         $email,
         PaymentInterface $paymentMethod,
-        AddressInterface $billingAddress = null
+        ?AddressInterface $billingAddress = null
     ) {
         $cartId = $this->maskedQuoteIdToQuoteId->execute($cartId);
         $addPaymentInfoEventData = $this->addPaymentInfo

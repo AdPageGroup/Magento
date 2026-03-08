@@ -6,6 +6,7 @@ use Tagging\GTM\Api\Data\TagInterface;
 
 class Event implements TagInterface
 {
+    #[\Override]
     public function get()
     {
         return null;

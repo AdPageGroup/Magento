@@ -12,6 +12,7 @@ class ViewCartOccurancesOptions implements OptionSourceInterface
     /**
      * {@inheritdoc}
      */
+    #[\Override]
     public function toOptionArray(): array
     {
         $options = [

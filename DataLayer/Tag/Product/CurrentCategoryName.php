@@ -8,25 +8,19 @@ use Tagging\GTM\Util\GetCurrentProduct;
 
 class CurrentCategoryName implements TagInterface
 {
-    private GetCurrentProduct $getCurrentProduct;
-    private ProductCategory $productCategory;
-
     /**
      * @param GetCurrentProduct $getCurrentProduct
      * @param ProductCategory $productCategory
      */
-    public function __construct(
-        GetCurrentProduct $getCurrentProduct,
-        ProductCategory $productCategory
-    ) {
-        $this->getCurrentProduct = $getCurrentProduct;
-        $this->productCategory = $productCategory;
+    public function __construct(private readonly GetCurrentProduct $getCurrentProduct, private readonly ProductCategory $productCategory)
+    {
     }
 
     /**
      * @return string
      * @throws NoSuchEntityException
      */
+    #[\Override]
     public function get(): string
     {
         $currentProduct = $this->getCurrentProduct->get();

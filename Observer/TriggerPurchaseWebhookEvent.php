@@ -16,23 +16,11 @@ use Tagging\GTM\Config\Config;
 
 class TriggerPurchaseWebhookEvent implements ObserverInterface
 {
-    private PurchaseWebhookEvent $webhookEvent;
-    private Debugger $debugger;
-    private OrderPaymentRepositoryInterface $orderPaymentRepository;
-    private Config $config;
-    
-    public function __construct(
-        PurchaseWebhookEvent $webhookEvent,
-        Debugger $debugger,
-        OrderPaymentRepositoryInterface $orderPaymentRepository,
-        Config $config
-    ) {
-        $this->webhookEvent = $webhookEvent;
-        $this->debugger = $debugger;
-        $this->orderPaymentRepository = $orderPaymentRepository;
-        $this->config = $config;
+    public function __construct(private readonly PurchaseWebhookEvent $webhookEvent, private readonly Debugger $debugger, private readonly OrderPaymentRepositoryInterface $orderPaymentRepository, private readonly Config $config)
+    {
     }
 
+    #[\Override]
     public function execute(Observer $observer)
     {
         /** @var OrderInterface $order */

@@ -9,23 +9,20 @@ use Magento\Framework\Data\OptionSourceInterface;
 
 class CategoryAttributes implements OptionSourceInterface
 {
-    private CategoryAttributeRepositoryInterface $categoryAttributeRepository;
-    private SearchCriteriaBuilder $searchCriteriaBuilder;
-    private SortOrderFactory $sortOrderFactory;
+    private readonly SortOrderFactory $sortOrderFactory;
 
     public function __construct(
-        CategoryAttributeRepositoryInterface $categoryAttributeRepository,
-        SearchCriteriaBuilder $searchCriteriaBuilder,
+        private readonly CategoryAttributeRepositoryInterface $categoryAttributeRepository,
+        private readonly SearchCriteriaBuilder $searchCriteriaBuilder,
         SortOrderFactory $sortOrderFactory
     ) {
-        $this->categoryAttributeRepository = $categoryAttributeRepository;
-        $this->searchCriteriaBuilder = $searchCriteriaBuilder;
         $this->sortOrderFactory = $sortOrderFactory;
     }
 
     /**
      * {@inheritdoc}
      */
+    #[\Override]
     public function toOptionArray(): array
     {
         $options = [['value' => '', 'label' => '']];

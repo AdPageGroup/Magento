@@ -11,18 +11,8 @@ use Magento\Store\Model\StoreManagerInterface;
 
 class GetCurrentProduct
 {
-    private RequestInterface $request;
-    private ProductRepositoryInterface $productRepository;
-    private StoreManagerInterface $storeManager;
-    
-    public function __construct(
-        RequestInterface $request,
-        ProductRepositoryInterface $productRepository,
-        StoreManagerInterface $storeManager
-    ) {
-        $this->request = $request;
-        $this->productRepository = $productRepository;
-        $this->storeManager = $storeManager;
+    public function __construct(private readonly RequestInterface $request, private readonly ProductRepositoryInterface $productRepository, private readonly StoreManagerInterface $storeManager)
+    {
     }
     
     /**

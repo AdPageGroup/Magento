@@ -20,6 +20,7 @@ class CategorySize implements TagInterface
     /**
      * @return int
      */
+    #[\Override]
     public function get(): int
     {
         return $this->size;

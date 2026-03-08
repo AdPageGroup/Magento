@@ -35,7 +35,7 @@ class DataLayerTest extends PageTestCase
         $block->setData('config', ObjectManager::getInstance()->get(Config::class));
         $html = $block->toHtml();
 
-        $this->assertTrue((bool)strpos($html, 'googleTagManagerPush'), 'Data layer not found in block output');
+        $this->assertTrue((bool)strpos((string) $html, 'googleTagManagerPush'), 'Data layer not found in block output');
     }
 
     /**
@@ -59,6 +59,6 @@ class DataLayerTest extends PageTestCase
         $this->assertNotFalse($block, 'Block "Tagging_GTM.data-layer" is empty');
 
         $array = $this->layout->getUpdate()->asArray();
-        $this->assertTrue((bool)strpos($body, 'googleTagManagerPush'), 'Data layer not found in HTML body: '. var_export($array, true));
+        $this->assertTrue((bool)strpos((string) $body, 'googleTagManagerPush'), 'Data layer not found in HTML body: '. var_export($array, true));
     }
 }

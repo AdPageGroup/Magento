@@ -10,24 +10,18 @@ use Tagging\GTM\Util\PriceFormatter;
 
 class CartValue implements TagInterface
 {
-    private CartModel $cartModel;
-    private PriceFormatter $priceFormatter;
-
     /**
      * @param CartModel $cartModel
      * @param PriceFormatter $priceFormatter
      */
-    public function __construct(
-        CartModel $cartModel,
-        PriceFormatter $priceFormatter
-    ) {
-        $this->cartModel = $cartModel;
-        $this->priceFormatter = $priceFormatter;
+    public function __construct(private readonly CartModel $cartModel, private readonly PriceFormatter $priceFormatter)
+    {
     }
 
     /**
      * @return float
      */
+    #[\Override]
     public function get(): float
     {
         return $this->priceFormatter->format((float)$this->cartModel->getQuote()->getBaseGrandTotal());

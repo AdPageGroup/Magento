@@ -10,14 +10,11 @@ use Tagging\GTM\Config\Config;
  */
 class AccountId implements TagInterface
 {
-    private Config $config;
-
-    public function __construct(
-        Config $config
-    ) {
-        $this->config = $config;
+    public function __construct(private readonly Config $config)
+    {
     }
 
+    #[\Override]
     public function get(): string
     {
         return $this->config->getId();

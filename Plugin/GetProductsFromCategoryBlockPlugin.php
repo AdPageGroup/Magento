@@ -10,22 +10,12 @@ use Tagging\GTM\Config\Config;
 
 class GetProductsFromCategoryBlockPlugin
 {
-    private CategorySize $categorySize;
-    private GetCurrentCategoryProducts $getCurrentCategoryProducts;
-    private Config $config;
-
     /**
      * GetProductsFromCategoryBlockPlugin constructor.
      * @param CategorySize $categorySize
      */
-    public function __construct(
-        CategorySize $categorySize,
-        GetCurrentCategoryProducts $getCurrentCategoryProducts,
-        Config $config
-    ) {
-        $this->categorySize = $categorySize;
-        $this->getCurrentCategoryProducts = $getCurrentCategoryProducts;
-        $this->config = $config;
+    public function __construct(private readonly CategorySize $categorySize, private readonly GetCurrentCategoryProducts $getCurrentCategoryProducts, private readonly Config $config)
+    {
     }
 
     /**

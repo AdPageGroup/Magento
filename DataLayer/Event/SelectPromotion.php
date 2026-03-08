@@ -16,6 +16,7 @@ class SelectPromotion implements EventInterface
     /**
      * @return array
      */
+    #[\Override]
     public function get(): array
     {
         $promotionsItemsData = [];

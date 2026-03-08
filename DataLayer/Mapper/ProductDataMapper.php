@@ -18,15 +18,6 @@ use Magento\Catalog\Api\ProductRepositoryInterface;
 
 class ProductDataMapper
 {
-    private Config $config;
-    private GetAttributeValue $getAttributeValue;
-    private CategoryProvider $categoryProvider;
-    private PriceFormatter $priceFormatter;
-    private Configurable $configurableType;
-    private ProductRepositoryInterface $productRepository;
-
-    private array $dataLayerMapping;
-
     private int $counter = 0;
 
     /**
@@ -36,22 +27,8 @@ class ProductDataMapper
      * @param PriceFormatter $priceFormatter
      * @param array $dataLayerMapping
      */
-    public function __construct(
-        Config $config,
-        GetAttributeValue $getAttributeValue,
-        CategoryProvider $categoryProvider,
-        PriceFormatter $priceFormatter,
-        Configurable $configurableType,
-        ProductRepositoryInterface $productRepository,
-        array $dataLayerMapping = []
-    ) {
-        $this->config = $config;
-        $this->getAttributeValue = $getAttributeValue;
-        $this->categoryProvider = $categoryProvider;
-        $this->priceFormatter = $priceFormatter;
-        $this->configurableType = $configurableType;
-        $this->productRepository = $productRepository;
-        $this->dataLayerMapping = $dataLayerMapping;
+    public function __construct(private readonly Config $config, private readonly GetAttributeValue $getAttributeValue, private readonly CategoryProvider $categoryProvider, private readonly PriceFormatter $priceFormatter, private readonly Configurable $configurableType, private readonly ProductRepositoryInterface $productRepository, private readonly array $dataLayerMapping = [])
+    {
     }
 
     /**
@@ -95,7 +72,7 @@ class ProductDataMapper
             $category = $this->categoryProvider->getFirstByProduct($product);
             $productData[$prefix . 'list_id'] = $category->getId();
             $productData[$prefix . 'list_name'] = $category->getName();
-        } catch (NoSuchEntityException $noSuchEntityException) {
+        } catch (NoSuchEntityException) {
         }
 
         $productData['price'] = $this->priceFormatter->format((float)$product->getFinalPrice());
@@ -126,7 +103,7 @@ class ProductDataMapper
     {
         try {
             $categories = $this->categoryProvider->getAllByProduct($product);
-        } catch (NoSuchEntityException $e) {
+        } catch (NoSuchEntityException) {
             return $data;
         }
 

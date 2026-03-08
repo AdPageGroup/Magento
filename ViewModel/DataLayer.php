@@ -13,16 +13,6 @@ use Tagging\GTM\Exception\BlockNotFound;
 
 class DataLayer implements ArgumentInterface
 {
-    private TagParser $variableParser;
-    private LayoutInterface $layout;
-    private SerializerInterface $serializer;
-
-    /**
-     * @var ProcessorInterface[]
-     */
-    protected array $processors;
-    private XmlConfig $xmlConfig;
-
     /**
      * @param TagParser $variableParser
      * @param LayoutInterface $layout
@@ -30,18 +20,8 @@ class DataLayer implements ArgumentInterface
      * @param XmlConfig $xmlConfig
      * @param array $processors
      */
-    public function __construct(
-        TagParser $variableParser,
-        LayoutInterface $layout,
-        SerializerInterface $serializer,
-        XmlConfig $xmlConfig,
-        array $processors = []
-    ) {
-        $this->variableParser = $variableParser;
-        $this->layout = $layout;
-        $this->serializer = $serializer;
-        $this->processors = $processors;
-        $this->xmlConfig = $xmlConfig;
+    public function __construct(private readonly TagParser $variableParser, private readonly LayoutInterface $layout, private readonly SerializerInterface $serializer, private readonly XmlConfig $xmlConfig, protected array $processors = [])
+    {
     }
 
     /**
@@ -51,7 +31,7 @@ class DataLayer implements ArgumentInterface
     {
         try {
             $block = $this->getDataLayerBlock();
-        } catch(BlockNotFound $blockNotFound) {
+        } catch(BlockNotFound) {
             return [];
         }
 
@@ -75,7 +55,7 @@ class DataLayer implements ArgumentInterface
     {
         try {
             $block = $this->getDataLayerBlock();
-        } catch(BlockNotFound $blockNotFound) {
+        } catch(BlockNotFound) {
             return [];
         }
 
@@ -119,7 +99,7 @@ class DataLayer implements ArgumentInterface
     {
         try {
             $block = $this->getDataLayerBlock();
-        } catch(BlockNotFound $blockNotFound) {
+        } catch(BlockNotFound) {
             return [];
         }
 

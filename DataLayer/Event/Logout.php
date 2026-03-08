@@ -6,6 +6,7 @@ use Tagging\GTM\Api\Data\EventInterface;
 
 class Logout implements EventInterface
 {
+    #[\Override]
     public function get(): array
     {
         return [

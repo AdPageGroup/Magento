@@ -28,24 +28,8 @@ class CategoryProvider
      */
     private array $loadedCategories = [];
 
-    private CategoryListInterface $categoryListRepository;
-    private FilterBuilder $filterBuilder;
-    private SearchCriteriaBuilder $searchCriteriaBuilder;
-    private FilterGroupBuilder $filterGroupBuilder;
-    private StoreManagerInterface $storeManager;
-
-    public function __construct(
-        CategoryListInterface $categoryListRepository,
-        FilterBuilder $filterBuilder,
-        SearchCriteriaBuilder $searchCriteriaBuilder,
-        FilterGroupBuilder $filterGroupBuilder,
-        StoreManagerInterface $storeManager
-    ) {
-        $this->categoryListRepository = $categoryListRepository;
-        $this->filterBuilder = $filterBuilder;
-        $this->searchCriteriaBuilder = $searchCriteriaBuilder;
-        $this->filterGroupBuilder = $filterGroupBuilder;
-        $this->storeManager = $storeManager;
+    public function __construct(private readonly CategoryListInterface $categoryListRepository, private readonly FilterBuilder $filterBuilder, private readonly SearchCriteriaBuilder $searchCriteriaBuilder, private readonly FilterGroupBuilder $filterGroupBuilder, private readonly StoreManagerInterface $storeManager)
+    {
     }
 
     /**
@@ -96,9 +80,7 @@ class CategoryProvider
             }
         }
 
-        return array_filter($this->loadedCategories, static function (CategoryInterface $category) {
-            return $category->getIsActive();
-        });
+        return array_filter($this->loadedCategories, static fn(CategoryInterface $category) => $category->getIsActive());
     }
 
     /**
@@ -194,9 +176,7 @@ class CategoryProvider
     private function filterRootCategoryIdFromCategoryIds(array $categoryIds): array
     {
         $rootCategoryId = $this->getRootCategoryId();
-        return array_filter($categoryIds, static function ($categoryId) use ($rootCategoryId) {
-            return (int)$categoryId !== $rootCategoryId;
-        });
+        return array_filter($categoryIds, static fn($categoryId) => (int)$categoryId !== $rootCategoryId);
     }
 
     /**

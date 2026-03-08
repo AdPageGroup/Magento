@@ -10,20 +10,11 @@ use Magento\Framework\Stdlib\CookieManagerInterface;
 use Tagging\GTM\Logger\Debugger;
 class TriggerCheckoutSessionSaveEvent implements ObserverInterface
 {
-    private CookieManagerInterface $cookieManager;
-    private OrderRepositoryInterface $orderRepository;
-    private Debugger $debugger;
-
-    public function __construct(
-        CookieManagerInterface $cookieManager,
-        OrderRepositoryInterface $orderRepository,
-        Debugger $debugger
-    ) {
-        $this->cookieManager = $cookieManager;
-        $this->orderRepository = $orderRepository;
-        $this->debugger = $debugger;
+    public function __construct(private readonly CookieManagerInterface $cookieManager, private readonly OrderRepositoryInterface $orderRepository, private readonly Debugger $debugger)
+    {
     }
 
+    #[\Override]
     public function execute(Observer $observer)
     {
         try {
@@ -34,7 +25,7 @@ class TriggerCheckoutSessionSaveEvent implements ObserverInterface
             $marketingCookie = $this->cookieManager->getCookie('trytagging_user_data', 'e30=');
             $this->debugger->debug("TriggerCheckoutSessionSaveEvent: Cookie value: " . $marketingCookie, $marketingCookie);
 
-            $marketingCookie = json_decode(base64_decode($marketingCookie), true);
+            $marketingCookie = json_decode(base64_decode((string) $marketingCookie), true);
             $marketingCookie['ip'] = $_SERVER['HTTP_X_FORWARDED_FOR'] ?? 
                 $_SERVER['HTTP_CLIENT_IP'] ?? 
                 $_SERVER['HTTP_X_REAL_IP'] ?? 

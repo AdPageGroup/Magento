@@ -9,21 +9,16 @@ use Magento\Framework\Module\Dir\Reader;
 class SchemaLocator implements SchemaLocatorInterface
 {
     /**
-     * @var Reader
-     */
-    private Reader $moduleReader;
-
-    /**
      * @param Reader $moduleReader
      */
-    public function __construct(Reader $moduleReader)
+    public function __construct(private readonly Reader $moduleReader)
     {
-        $this->moduleReader = $moduleReader;
     }
 
     /**
      * @inheritdoc
      */
+    #[\Override]
     public function getSchema()
     {
         return $this->getXsdPath();
@@ -32,6 +27,7 @@ class SchemaLocator implements SchemaLocatorInterface
     /**
      * @inheritdoc
      */
+    #[\Override]
     public function getPerFileSchema()
     {
         return $this->getXsdPath();

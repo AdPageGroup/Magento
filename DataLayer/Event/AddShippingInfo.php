@@ -14,28 +14,19 @@ use Tagging\GTM\DataLayer\Tag\Cart\CartItems;
 
 class AddShippingInfo implements EventInterface
 {
-    private CartItems $cartItems;
-    private ShippingMethodManagementInterface $shippingMethodManagement;
-    private CheckoutSession $checkoutSession;
-
     /**
      * @param CartItems $cartItems
      * @param ShippingMethodManagementInterface $shippingMethodManagement
      * @param CheckoutSession $checkoutSession
      */
-    public function __construct(
-        CartItems $cartItems,
-        ShippingMethodManagementInterface $shippingMethodManagement,
-        CheckoutSession $checkoutSession
-    ) {
-        $this->cartItems = $cartItems;
-        $this->shippingMethodManagement = $shippingMethodManagement;
-        $this->checkoutSession = $checkoutSession;
+    public function __construct(private readonly CartItems $cartItems, private readonly ShippingMethodManagementInterface $shippingMethodManagement, private readonly CheckoutSession $checkoutSession)
+    {
     }
 
     /**
      * @return string[]
      */
+    #[\Override]
     public function get(): array
     {
         if (false === $this->checkoutSession->hasQuote()) {
@@ -44,7 +35,7 @@ class AddShippingInfo implements EventInterface
 
         try {
             $quote = $this->checkoutSession->getQuote();
-        } catch (NoSuchEntityException|LocalizedException $e) {
+        } catch (NoSuchEntityException|LocalizedException) {
             return [];
         }
 
@@ -74,14 +65,13 @@ class AddShippingInfo implements EventInterface
             if ($shippingMethod instanceof ShippingMethodInterface) {
                 return $shippingMethod->getCarrierCode().'_'.$shippingMethod->getMethodCode();
             }
-        } catch (NoSuchEntityException $e) {
-        } catch (StateException $e) {
+        } catch (NoSuchEntityException|StateException) {
         }
 
         try {
             // @phpstan-ignore-next-line
             return $quote->getShippingAddress()->getShippingMethod();
-        } catch (NoSuchEntityException $e) {
+        } catch (NoSuchEntityException) {
         }
 
         return null;

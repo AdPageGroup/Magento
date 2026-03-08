@@ -16,12 +16,6 @@ use Tagging\GTM\DataLayer\Tag\Version;
 
 class Config implements ArgumentInterface
 {
-    private ScopeConfigInterface $scopeConfig;
-    private CookieHelper $cookieHelper;
-    private StoreManagerInterface $storeManager;
-    private AppState $appState;
-    private Version $version;
-
     /**
      * Config constructor.
      *
@@ -29,18 +23,8 @@ class Config implements ArgumentInterface
      * @param StoreManagerInterface $storeManager
      * @param CookieHelper $cookieHelper
      */
-    public function __construct(
-        ScopeConfigInterface $scopeConfig,
-        StoreManagerInterface $storeManager,
-        CookieHelper $cookieHelper,
-        AppState $appState,
-        Version $version
-    ) {
-        $this->scopeConfig = $scopeConfig;
-        $this->storeManager = $storeManager;
-        $this->cookieHelper = $cookieHelper;
-        $this->appState = $appState;
-        $this->version = $version;
+    public function __construct(private readonly ScopeConfigInterface $scopeConfig, private readonly StoreManagerInterface $storeManager, private readonly CookieHelper $cookieHelper, private readonly AppState $appState, private readonly Version $version)
+    {
     }
 
     /**
@@ -189,7 +173,7 @@ class Config implements ArgumentInterface
                 ScopeInterface::SCOPE_STORE,
                 $this->storeManager->getStore()
             );
-        } catch (NoSuchEntityException $e) {
+        } catch (NoSuchEntityException) {
             return $defaultValue;
         }
 

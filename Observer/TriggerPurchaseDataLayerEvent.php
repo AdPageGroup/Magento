@@ -12,20 +12,11 @@ use Exception;
 
 class TriggerPurchaseDataLayerEvent implements ObserverInterface
 {
-    private CheckoutSessionDataProviderInterface $checkoutSessionDataProvider;
-    private PurchaseEvent $purchaseEvent;
-    private Debugger $debugger;
-
-    public function __construct(
-        CheckoutSessionDataProviderInterface $checkoutSessionDataProvider,
-        PurchaseEvent $purchaseEvent,
-        Debugger $debugger
-    ) {
-        $this->checkoutSessionDataProvider = $checkoutSessionDataProvider;
-        $this->purchaseEvent = $purchaseEvent;
-        $this->debugger = $debugger;
+    public function __construct(private readonly CheckoutSessionDataProviderInterface $checkoutSessionDataProvider, private readonly PurchaseEvent $purchaseEvent, private readonly Debugger $debugger)
+    {
     }
 
+    #[\Override]
     public function execute(Observer $observer)
     {
         /** @var OrderInterface $order */

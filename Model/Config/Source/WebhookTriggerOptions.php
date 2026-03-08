@@ -12,6 +12,7 @@ class WebhookTriggerOptions implements OptionSourceInterface
     /**
      * {@inheritdoc}
      */
+    #[\Override]
     public function toOptionArray(): array
     {
         $options = [

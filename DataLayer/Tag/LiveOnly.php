@@ -7,16 +7,14 @@ use Tagging\GTM\Api\Data\TagInterface;
 
 class LiveOnly implements TagInterface
 {
-    private State $state;
-
     /**
      * @param State $state
      */
-    public function __construct(State $state)
+    public function __construct(private readonly State $state)
     {
-        $this->state = $state;
     }
 
+    #[\Override]
     public function get(): bool
     {
         return $this->state->getMode() === State::MODE_PRODUCTION;

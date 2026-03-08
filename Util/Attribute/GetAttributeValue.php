@@ -24,19 +24,12 @@ use Tagging\GTM\Util\CamelCase;
 
 class GetAttributeValue
 {
-    private EavConfig $eavConfig;
-    private CamelCase $camelCase;
-
     /**
      * @param EavConfig $eavConfig
      * @param CamelCase $camelCase
      */
-    public function __construct(
-        EavConfig $eavConfig,
-        CamelCase $camelCase
-    ) {
-        $this->eavConfig = $eavConfig;
-        $this->camelCase = $camelCase;
+    public function __construct(private readonly EavConfig $eavConfig, private readonly CamelCase $camelCase)
+    {
     }
 
     /**
@@ -108,10 +101,9 @@ class GetAttributeValue
 
     /**
      * @param Attribute $attribute
-     * @param mixed $attributeValue
      * @return mixed|string
      */
-    private function filterAttributeValue(AbstractAttribute $attribute, $attributeValue)
+    private function filterAttributeValue(AbstractAttribute $attribute, mixed $attributeValue)
     {
         if (in_array($attribute->getFrontendInput(), ['textarea', 'text']) && !is_array($attributeValue)) {
             return strip_tags((string)$attributeValue);
@@ -130,11 +122,10 @@ class GetAttributeValue
 
     /**
      * @param AbstractAttribute $attribute
-     * @param mixed $attributeValue
      * @return string
      * @throws LocalizedException
      */
-    private function getAttributeValueFromSelect(AbstractAttribute $attribute, $attributeValue): string
+    private function getAttributeValueFromSelect(AbstractAttribute $attribute, mixed $attributeValue): string
     {
         if (empty($attributeValue)) {
             return '';
@@ -152,11 +143,10 @@ class GetAttributeValue
 
     /**
      * @param AbstractAttribute $attribute
-     * @param mixed $attributeValue
      * @return array
      * @throws LocalizedException
      */
-    private function getAttributeValueFromMultiSelect(AbstractAttribute $attribute, $attributeValue): array
+    private function getAttributeValueFromMultiSelect(AbstractAttribute $attribute, mixed $attributeValue): array
     {
         if (empty($attributeValue)) {
             return [];
@@ -164,7 +154,7 @@ class GetAttributeValue
 
         $attributeValues = is_array($attributeValue)
             ? $attributeValue
-            : explode(',', $attributeValue);
+            : explode(',', (string) $attributeValue);
 
         $options = $attribute->getSource()->getAllOptions();
         $attributeLabels = [];

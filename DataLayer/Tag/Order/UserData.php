@@ -11,20 +11,14 @@ use Tagging\GTM\Api\Data\TagInterface;
 
 class UserData implements TagInterface
 {
-    private CheckoutSession $checkoutSession;
-    private OrderRepositoryInterface $orderRepository;
-
-    public function __construct(
-        CheckoutSession $checkoutSession,
-        OrderRepositoryInterface $orderRepository
-    ) {
-        $this->checkoutSession = $checkoutSession;
-        $this->orderRepository = $orderRepository;
+    public function __construct(private readonly CheckoutSession $checkoutSession, private readonly OrderRepositoryInterface $orderRepository)
+    {
     }
 
     /**
      * @return array
      */
+    #[\Override]
     public function get(): array
     {
         $order = $this->getOrder();

@@ -11,25 +11,20 @@ use Tagging\GTM\Util\GetCurrentProduct;
 class CurrentProduct implements MergeTagInterface
 {
     private ?ProductInterface $product = null;
-    private GetCurrentProduct $getCurrentProduct;
-    private ProductDataMapper $productDataMapper;
 
     /**
      * @param GetCurrentProduct $getCurrentProduct
      * @param ProductDataMapper $productDataMapper
      */
-    public function __construct(
-        GetCurrentProduct $getCurrentProduct,
-        ProductDataMapper $productDataMapper
-    ) {
-        $this->getCurrentProduct = $getCurrentProduct;
-        $this->productDataMapper = $productDataMapper;
+    public function __construct(private readonly GetCurrentProduct $getCurrentProduct, private readonly ProductDataMapper $productDataMapper)
+    {
     }
 
     /**
      * @return string[]
      * @throws NoSuchEntityException
      */
+    #[\Override]
     public function merge(): array
     {
         return $this->productDataMapper->mapByProduct($this->getProduct());

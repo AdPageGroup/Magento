@@ -11,25 +11,20 @@ use Tagging\GTM\Exception\BlockNotFound;
 
 class AddProductDetails
 {
-    private LayoutInterface $layout;
-
-    public function __construct(
-        LayoutInterface $layout
-    ) {
-        $this->layout = $layout;
+    public function __construct(private readonly LayoutInterface $layout)
+    {
     }
 
     /**
      * @param AbstractProduct $abstractProduct
-     * @param mixed $html
      * @param ProductInterface $product
      * @return string
      */
-    public function afterGetProductDetailsHtml(AbstractProduct $abstractProduct, $html, ProductInterface $product)
+    public function afterGetProductDetailsHtml(AbstractProduct $abstractProduct, mixed $html, ProductInterface $product)
     {
         try {
             $block = $this->getProductDetailsBlock();
-        } catch (BlockNotFound $blockNotFound) {
+        } catch (BlockNotFound) {
             return $html;
         }
 

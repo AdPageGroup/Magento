@@ -10,29 +10,17 @@ use Tagging\GTM\DataLayer\Tag\CurrencyCode;
 
 class BeginCheckout implements EventInterface
 {
-    private Quote $quote;
-    private CartItems $cartItems;
-    private CartValue $cartValue;
-    private CurrencyCode $currencyCode;
-
     /**
      * @param Quote $quote
      * @param CartItems $cartItems
      * @param CartValue $cartValue
      * @param CurrencyCode $currencyCode
      */
-    public function __construct(
-        Quote $quote,
-        CartItems $cartItems,
-        CartValue $cartValue,
-        CurrencyCode $currencyCode
-    ) {
-        $this->quote = $quote;
-        $this->cartItems = $cartItems;
-        $this->cartValue = $cartValue;
-        $this->currencyCode = $currencyCode;
+    public function __construct(private readonly Quote $quote, private readonly CartItems $cartItems, private readonly CartValue $cartValue, private readonly CurrencyCode $currencyCode)
+    {
     }
 
+    #[\Override]
     public function get(): array
     {
         return [

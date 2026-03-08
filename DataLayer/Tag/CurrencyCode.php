@@ -9,20 +9,11 @@ use Tagging\GTM\Api\Data\TagInterface;
 use Tagging\GTM\Logger\Debugger;
 class CurrencyCode implements TagInterface
 {
-    private StoreManagerInterface $storeManager;
-    private LoggerInterface $logger;
-    private Debugger $debugger;
-
-    public function __construct(
-        StoreManagerInterface $storeManager,
-        LoggerInterface $logger,
-        Debugger $debugger
-    ) {
-        $this->storeManager = $storeManager;
-        $this->logger = $logger;
-        $this->debugger = $debugger;
+    public function __construct(private readonly StoreManagerInterface $storeManager, private readonly LoggerInterface $logger, private readonly Debugger $debugger)
+    {
     }
 
+    #[\Override]
     public function get(): string
     {
         try {

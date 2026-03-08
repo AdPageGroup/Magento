@@ -8,15 +8,8 @@ use Tagging\GTM\DataLayer\Event\ViewSearchResult as ViewSearchResultEvent;
 
 class TriggerViewSearchResultDataLayerEvent
 {
-    private ViewSearchResultEvent $viewSearchResultEvent;
-    private CustomerSessionDataProviderInterface $customerSessionDataProvider;
-
-    public function __construct(
-        ViewSearchResultEvent $viewSearchResultEvent,
-        CustomerSessionDataProviderInterface $customerSessionDataProvider
-    ) {
-        $this->viewSearchResultEvent = $viewSearchResultEvent;
-        $this->customerSessionDataProvider = $customerSessionDataProvider;
+    public function __construct(private readonly ViewSearchResultEvent $viewSearchResultEvent, private readonly CustomerSessionDataProviderInterface $customerSessionDataProvider)
+    {
     }
 
     public function afterExecute(Index $subject, $return)

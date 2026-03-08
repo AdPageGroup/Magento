@@ -10,13 +10,11 @@ use Tagging\GTM\Config\Config;
 
 class DynamicTaggingCollector implements PolicyCollectorInterface
 {
-    private Config $config;
-
-    public function __construct(Config $config)
+    public function __construct(private readonly Config $config)
     {
-        $this->config = $config;
     }
 
+    #[\Override]
     public function collect(array $defaultPolicies = []): array
     {
         try {
@@ -66,7 +64,7 @@ class DynamicTaggingCollector implements PolicyCollectorInterface
 
            return array_merge($defaultPolicies, $policies);
 
-        } catch (\Exception $e) {
+        } catch (\Exception) {
             return $defaultPolicies;
         }
     }
