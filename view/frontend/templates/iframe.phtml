@@ -42,14 +42,12 @@ window.tagging_gtm_simple_hash = function(eventData) {
 
     const parts = [];
 
-    // Add items and quantities
     eventData.ecommerce.items.forEach(item => {
         const itemId = item.item_id || "";
         const quantity = item.quantity || 0;
         parts.push(`i_id=${itemId}&qt=${quantity}`);
     });
 
-    // Join all parts and encode to base64
     const value = parts.join("&");
     return btoa(value);
 }
@@ -66,19 +64,16 @@ window.tagging_gtm_advanced_hash = function(eventData) {
 
     const parts = [];
 
-    // Add items and quantities
     eventData.ecommerce.items.forEach(item => {
         const itemId = item.item_id || "";
         const quantity = item.quantity || 0;
         parts.push(`i_id=${itemId}&qt=${quantity}`);
     });
 
-    // Add user agent (normalized: lowercase, spaces removed)
     const userAgent = navigator.userAgent || "";
     const normalizedUserAgent = userAgent.toLowerCase().replace(/\s+/g, "");
     parts.push(`--ua=${normalizedUserAgent}`);
 
-    // Join all parts and encode to base64
     const value = parts.join("&");
     return btoa(value);
 }
