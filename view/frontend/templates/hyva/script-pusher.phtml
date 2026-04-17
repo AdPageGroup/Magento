@@ -57,7 +57,6 @@ declare(strict_types=1);
         }
 
         try {
-            // Add logic to store event
             if ((eventData.event === 'trytagging_begin_checkout' || eventData.event === 'trytagging_view_cart') && eventData.marketing) {
                 const simpleHash = window.tagging_gtm_simple_hash(eventData);
                 const advancedHash = window.tagging_gtm_advanced_hash(eventData);
@@ -66,7 +65,6 @@ declare(strict_types=1);
                 window.tagging_gtm_save_hash(advancedHash, eventData.marketing);
             }
         } catch (error) {
-            // Ensure we don't break the event
             console.error('Error generating hashes:', error);
         }
 
