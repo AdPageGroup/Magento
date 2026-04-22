@@ -50,7 +50,7 @@ window.tagging_gtm_simple_hash = function(eventData) {
 
     const value = parts.join("&");
     return btoa(value);
-}
+};
 
 /**
  * Generate advanced hash based on items, quantities, and user agent
@@ -76,7 +76,7 @@ window.tagging_gtm_advanced_hash = function(eventData) {
 
     const value = parts.join("&");
     return btoa(value);
-}
+};
 
 window.tagging_gtm_save_hash = function(hash, marketingObject) {
     if (!hash || !marketingObject) {
@@ -99,7 +99,7 @@ window.tagging_gtm_save_hash = function(hash, marketingObject) {
     .catch((err) => {
         console.error(`Error sending data to API`, err);
     });
-}';
+};';
     
     if ($isHyva): ?>
         <script><?= $mainScript ?></script><?php $hyvaCsp->registerInlineScript() ?>
