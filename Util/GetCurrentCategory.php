@@ -11,18 +11,8 @@ use Magento\Store\Model\StoreManagerInterface;
 
 class GetCurrentCategory
 {
-    private RequestInterface $request;
-    private CategoryRepositoryInterface $categoryRepository;
-    private StoreManagerInterface $storeManager;
-
-    public function __construct(
-        RequestInterface $request,
-        CategoryRepositoryInterface $categoryRepository,
-        StoreManagerInterface $storeManager
-    ) {
-        $this->request = $request;
-        $this->categoryRepository = $categoryRepository;
-        $this->storeManager = $storeManager;
+    public function __construct(private readonly RequestInterface $request, private readonly CategoryRepositoryInterface $categoryRepository, private readonly StoreManagerInterface $storeManager)
+    {
     }
 
     /**
@@ -34,7 +24,7 @@ class GetCurrentCategory
         $categoryId = (int)$this->request->getParam('id');
         try {
             $category = $this->categoryRepository->get($categoryId);
-        } catch (NoSuchEntityException $e) {
+        } catch (NoSuchEntityException) {
             /** @var Store $store */
             $store = $this->storeManager->getStore();
             $category = $this->categoryRepository->get($store->getRootCategoryId());

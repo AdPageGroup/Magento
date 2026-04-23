@@ -7,6 +7,7 @@ use Tagging\GTM\Exception\InvalidConfig;
 
 class ContainerConfig extends Value
 {
+    #[\Override]
     public function beforeSave()
     {
         if (false === $this->validate()) {

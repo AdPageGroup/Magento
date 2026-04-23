@@ -13,27 +13,14 @@ use Tagging\GTM\Util\ProductProvider;
 
 class CartItemDataMapper
 {
-    private ProductDataMapper $productDataMapper;
-    private ProductProvider $productProvider;
-    private PriceFormatter $priceFormatter;
-    private ScopeConfigInterface $scopeConfig;
-
     /**
      * @param ProductDataMapper $productDataMapper
      * @param ProductProvider $productProvider
      * @param PriceFormatter $priceFormatter
      * @param ScopeConfigInterface $scopeConfig
      */
-    public function __construct(
-        ProductDataMapper $productDataMapper,
-        ProductProvider $productProvider,
-        PriceFormatter $priceFormatter,
-        ScopeConfigInterface $scopeConfig
-    ) {
-        $this->productDataMapper = $productDataMapper;
-        $this->productProvider = $productProvider;
-        $this->priceFormatter = $priceFormatter;
-        $this->scopeConfig = $scopeConfig;
+    public function __construct(private readonly ProductDataMapper $productDataMapper, private readonly ProductProvider $productProvider, private readonly PriceFormatter $priceFormatter, private readonly ScopeConfigInterface $scopeConfig)
+    {
     }
 
     /**
@@ -46,7 +33,7 @@ class CartItemDataMapper
         try {
             $product = $this->productProvider->getBySku($cartItem->getSku());
             $cartItemData = $this->productDataMapper->mapByProduct($product);
-        } catch (NoSuchEntityException $e) {
+        } catch (NoSuchEntityException) {
             $cartItemData = [];
         }
 
@@ -71,16 +58,10 @@ class CartItemDataMapper
             $cartItem->getStoreId() // @phpstan-ignore-line
         );
 
-        switch ($displayType) {
-            case Config::DISPLAY_TYPE_EXCLUDING_TAX:
-            case Config::DISPLAY_TYPE_BOTH:
-                $price = $cartItem->getConvertedPrice(); // @phpstan-ignore-line
-                break;
-            case Config::DISPLAY_TYPE_INCLUDING_TAX:
-            default:
-                $price = $cartItem->getPriceInclTax(); // @phpstan-ignore-line
-                break;
-        }
+        $price = match ($displayType) {
+            Config::DISPLAY_TYPE_EXCLUDING_TAX, Config::DISPLAY_TYPE_BOTH => $cartItem->getConvertedPrice(),
+            default => $cartItem->getPriceInclTax(),
+        };
 
         return $this->priceFormatter->format((float)$price);
     }

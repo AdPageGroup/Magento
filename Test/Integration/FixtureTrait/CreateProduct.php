@@ -109,7 +109,7 @@ trait CreateProduct
                     'catalog_url_rewrite_product_category'
                 ).'` WHERE product_id='.$id
             );
-        } catch (NoSuchEntityException $e) {
+        } catch (NoSuchEntityException) {
         }
     }
 

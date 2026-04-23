@@ -10,11 +10,8 @@ use Tagging\GTM\Api\Data\TagInterface;
 
 class Converter implements ConverterInterface
 {
-    private ObjectManagerInterface $objectManager;
-
-    public function __construct(ObjectManagerInterface $objectManager)
+    public function __construct(private readonly ObjectManagerInterface $objectManager)
     {
-        $this->objectManager = $objectManager;
     }
 
     /**
@@ -23,6 +20,7 @@ class Converter implements ConverterInterface
      * @param DOMDocument $source
      * @return array
      */
+    #[\Override]
     public function convert($source): array
     {
         $result = [

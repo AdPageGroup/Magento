@@ -10,24 +10,20 @@ use Magento\Framework\Data\OptionSourceInterface;
 class ProductAttributes implements OptionSourceInterface
 {
     const REQUIRED_ATTRIBUTES = ['id', 'sku', 'name'];
-
-    private ProductAttributeRepositoryInterface $productAttributeRepository;
-    private SearchCriteriaBuilder $searchCriteriaBuilder;
-    private SortOrderFactory $sortOrderFactory;
+    private readonly SortOrderFactory $sortOrderFactory;
 
     public function __construct(
-        ProductAttributeRepositoryInterface $productAttributeRepository,
-        SearchCriteriaBuilder $searchCriteriaBuilder,
+        private readonly ProductAttributeRepositoryInterface $productAttributeRepository,
+        private readonly SearchCriteriaBuilder $searchCriteriaBuilder,
         SortOrderFactory $sortOrderFactory
     ) {
-        $this->productAttributeRepository = $productAttributeRepository;
-        $this->searchCriteriaBuilder = $searchCriteriaBuilder;
         $this->sortOrderFactory = $sortOrderFactory;
     }
 
     /**
      * {@inheritdoc}
      */
+    #[\Override]
     public function toOptionArray(): array
     {
         $options = [['value' => '', 'label' => '']];

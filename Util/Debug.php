@@ -16,27 +16,13 @@ use Tagging\GTM\Config\Config;
 class Debug
 {
     /**
-     * @var Config
-     */
-    private $config;
-
-    /**
-     * @var LoggerInterface
-     */
-    private $logger;
-
-    /**
      * Data constructor.
      *
      * @param Config $config
      * @param LoggerInterface $logger
      */
-    public function __construct(
-        Config $config,
-        LoggerInterface $logger
-    ) {
-        $this->config = $config;
-        $this->logger = $logger;
+    public function __construct(private readonly Config $config, private readonly LoggerInterface $logger)
+    {
     }
 
     /**

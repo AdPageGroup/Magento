@@ -14,27 +14,15 @@ use Magento\Catalog\Api\ProductRepositoryInterface;
 
 class AddToCart implements EventInterface
 {
-    private ProductDataMapper $productDataMapper;
-    private CurrencyCode $currencyCode;
-    private PriceFormatter $priceFormatter;
     private Product $product;
-    private ProductRepositoryInterface $productRepository;
     private int $qty = 1;
 
     /**
      * @param ProductDataMapper $productDataMapper
      * @param CurrencyCode $currencyCode
      */
-    public function __construct(
-        ProductDataMapper $productDataMapper,
-        CurrencyCode $currencyCode,
-        PriceFormatter $priceFormatter,
-        ProductRepositoryInterface $productRepository
-    ) {
-        $this->productDataMapper = $productDataMapper;
-        $this->currencyCode = $currencyCode;
-        $this->priceFormatter = $priceFormatter;
-        $this->productRepository = $productRepository;
+    public function __construct(private readonly ProductDataMapper $productDataMapper, private readonly CurrencyCode $currencyCode, private readonly PriceFormatter $priceFormatter, private readonly ProductRepositoryInterface $productRepository)
+    {
     }
 
     /**
@@ -42,6 +30,7 @@ class AddToCart implements EventInterface
      * @throws LocalizedException
      * @throws NoSuchEntityException
      */
+    #[\Override]
     public function get(): array
     {
         $qty = ($this->qty > 0) ? $this->qty : 1;
@@ -50,7 +39,7 @@ class AddToCart implements EventInterface
 
         try {
             $product = $this->productRepository->get($this->product->getSku());
-        } catch (Exception $e) {
+        } catch (Exception) {
             // Continue normal product flow since the sku is not found.
         }
         

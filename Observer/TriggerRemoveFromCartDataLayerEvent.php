@@ -10,17 +10,11 @@ use Tagging\GTM\DataLayer\Event\RemoveFromCart as RemoveFromCartEvent;
 
 class TriggerRemoveFromCartDataLayerEvent implements ObserverInterface
 {
-    private CheckoutSessionDataProviderInterface $checkoutSessionDataProvider;
-    private RemoveFromCartEvent $removeFromCartEvent;
-
-    public function __construct(
-        CheckoutSessionDataProviderInterface $checkoutSessionDataProvider,
-        RemoveFromCartEvent $removeFromCartEvent
-    ) {
-        $this->checkoutSessionDataProvider = $checkoutSessionDataProvider;
-        $this->removeFromCartEvent = $removeFromCartEvent;
+    public function __construct(private readonly CheckoutSessionDataProviderInterface $checkoutSessionDataProvider, private readonly RemoveFromCartEvent $removeFromCartEvent)
+    {
     }
 
+    #[\Override]
     public function execute(Observer $observer)
     {
         /** @var CartItemInterface $quoteItem */

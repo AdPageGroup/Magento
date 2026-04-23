@@ -9,23 +9,13 @@ use Tagging\GTM\Util\CamelCase;
 
 class CustomerDataMapper
 {
-    private CamelCase $camelCase;
-    private Config $config;
-    private GetAttributeValue $getAttributeValue;
-
     /**
      * @param CamelCase $camelCase
      * @param Config $config
      * @param GetAttributeValue $getAttributeValue
      */
-    public function __construct(
-        CamelCase $camelCase,
-        Config $config,
-        GetAttributeValue $getAttributeValue
-    ) {
-        $this->camelCase = $camelCase;
-        $this->config = $config;
-        $this->getAttributeValue = $getAttributeValue;
+    public function __construct(private readonly CamelCase $camelCase, private readonly Config $config, private readonly GetAttributeValue $getAttributeValue)
+    {
     }
 
     /**

@@ -11,12 +11,6 @@ use Tagging\GTM\Util\PriceFormatter;
 
 class OrderDataMapper
 {
-    private PriceFormatter $priceFormatter;
-    private GuestDataMapper $guestDataMapper;
-    private CustomerDataMapper $customerDataMapper;
-    private CustomerRepositoryInterface $customerRepository;
-    private Config $config;
-
     /**
      * @param PriceFormatter $priceFormatter
      * @param GuestDataMapper $guestDataMapper
@@ -24,18 +18,8 @@ class OrderDataMapper
      * @param CustomerRepositoryInterface $customerRepository
      * @param Config $config
      */
-    public function __construct(
-        PriceFormatter $priceFormatter,
-        GuestDataMapper $guestDataMapper,
-        CustomerDataMapper $customerDataMapper,
-        CustomerRepositoryInterface $customerRepository,
-        Config $config
-    ) {
-        $this->priceFormatter = $priceFormatter;
-        $this->guestDataMapper = $guestDataMapper;
-        $this->customerDataMapper = $customerDataMapper;
-        $this->customerRepository = $customerRepository;
-        $this->config = $config;
+    public function __construct(private readonly PriceFormatter $priceFormatter, private readonly GuestDataMapper $guestDataMapper, private readonly CustomerDataMapper $customerDataMapper, private readonly CustomerRepositoryInterface $customerRepository, private readonly Config $config)
+    {
     }
 
     /**
@@ -56,7 +40,7 @@ class OrderDataMapper
             'shipping' => $this->priceFormatter->format((float)$order->getShippingInclTax()),
             'tax' => $this->priceFormatter->format((float)$order->getTaxAmount()),
             'coupon' => $order->getCouponCode(),
-            'date' => date("Y-m-d", strtotime($order->getCreatedAt())),
+            'date' => date("Y-m-d", strtotime((string) $order->getCreatedAt())),
             'paymentType' => $this->getPaymentType($order),
             'customer' => $this->getCustomerData($order),
         ];

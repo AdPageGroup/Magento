@@ -10,23 +10,20 @@ use Magento\Framework\Data\OptionSourceInterface;
 
 class CustomerAttributes implements OptionSourceInterface
 {
-    private AttributeRepositoryInterface $attributeRepository;
-    private SearchCriteriaBuilder $searchCriteriaBuilder;
-    private SortOrderFactory $sortOrderFactory;
+    private readonly SortOrderFactory $sortOrderFactory;
 
     public function __construct(
-        AttributeRepositoryInterface $attributeRepository,
-        SearchCriteriaBuilder $searchCriteriaBuilder,
+        private readonly AttributeRepositoryInterface $attributeRepository,
+        private readonly SearchCriteriaBuilder $searchCriteriaBuilder,
         SortOrderFactory $sortOrderFactory
     ) {
-        $this->attributeRepository = $attributeRepository;
-        $this->searchCriteriaBuilder = $searchCriteriaBuilder;
         $this->sortOrderFactory = $sortOrderFactory;
     }
 
     /**
      * {@inheritdoc}
      */
+    #[\Override]
     public function toOptionArray(): array
     {
         $options = [['value' => '', 'label' => '']];

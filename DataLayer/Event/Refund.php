@@ -12,23 +12,15 @@ use Tagging\GTM\Util\PriceFormatter;
 class Refund implements EventInterface
 {
     private ?OrderInterface $order = null;
-    private OrderItems $orderItems;
-    private Config $config;
-    private PriceFormatter $priceFormatter;
 
-    public function __construct(
-        OrderItems $orderItems,
-        Config $config,
-        PriceFormatter $priceFormatter
-    ) {
-        $this->orderItems = $orderItems;
-        $this->config = $config;
-        $this->priceFormatter = $priceFormatter;
+    public function __construct(private readonly OrderItems $orderItems, private readonly Config $config, private readonly PriceFormatter $priceFormatter)
+    {
     }
 
     /**
      * @return string[]
      */
+    #[\Override]
     public function get(): array
     {
         $order = $this->order;

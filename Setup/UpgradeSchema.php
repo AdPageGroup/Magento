@@ -12,6 +12,7 @@ use Magento\Framework\DB\Ddl\Table;
 
 class UpgradeSchema implements UpgradeSchemaInterface
 {
+    #[\Override]
     public function upgrade(SchemaSetupInterface $setup, ModuleContextInterface $context)
     {
         $installer = $setup;

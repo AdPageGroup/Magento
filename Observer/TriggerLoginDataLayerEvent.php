@@ -9,17 +9,11 @@ use Tagging\GTM\DataLayer\Event\Login as LoginEvent;
 
 class TriggerLoginDataLayerEvent implements ObserverInterface
 {
-    private CustomerSessionDataProviderInterface $customerSessionDataProvider;
-    private LoginEvent $loginEvent;
-
-    public function __construct(
-        CustomerSessionDataProviderInterface $customerSessionDataProvider,
-        LoginEvent $loginEvent
-    ) {
-        $this->customerSessionDataProvider = $customerSessionDataProvider;
-        $this->loginEvent = $loginEvent;
+    public function __construct(private readonly CustomerSessionDataProviderInterface $customerSessionDataProvider, private readonly LoginEvent $loginEvent)
+    {
     }
 
+    #[\Override]
     public function execute(Observer $observer)
     {
         $customer = $observer->getEvent()->getCustomer();

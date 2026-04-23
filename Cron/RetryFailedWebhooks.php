@@ -15,30 +15,8 @@ use Psr\Log\LoggerInterface;
 
 class RetryFailedWebhooks
 {
-    private OrderRepositoryInterface $orderRepository;
-    private OrderPaymentRepositoryInterface $orderPaymentRepository;
-    private SearchCriteriaBuilder $searchCriteriaBuilder;
-    private FilterBuilder $filterBuilder;
-    private PurchaseWebhookEvent $webhookEvent;
-    private Debugger $debugger;
-    private LoggerInterface $logger;
-
-    public function __construct(
-        OrderRepositoryInterface $orderRepository,
-        OrderPaymentRepositoryInterface $orderPaymentRepository,
-        SearchCriteriaBuilder $searchCriteriaBuilder,
-        FilterBuilder $filterBuilder,
-        PurchaseWebhookEvent $webhookEvent,
-        Debugger $debugger,
-        LoggerInterface $logger
-    ) {
-        $this->orderRepository = $orderRepository;
-        $this->orderPaymentRepository = $orderPaymentRepository;
-        $this->searchCriteriaBuilder = $searchCriteriaBuilder;
-        $this->filterBuilder = $filterBuilder;
-        $this->webhookEvent = $webhookEvent;
-        $this->debugger = $debugger;
-        $this->logger = $logger;
+    public function __construct(private readonly OrderRepositoryInterface $orderRepository, private readonly OrderPaymentRepositoryInterface $orderPaymentRepository, private readonly SearchCriteriaBuilder $searchCriteriaBuilder, private readonly FilterBuilder $filterBuilder, private readonly PurchaseWebhookEvent $webhookEvent, private readonly Debugger $debugger, private readonly LoggerInterface $logger)
+    {
     }
 
     /**

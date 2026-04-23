@@ -16,6 +16,7 @@ class CheckoutOnepageSuccessTest extends PageTestCase
     /**
      * @inheritdoc
      */
+    #[\Override]
     protected function setUp(): void
     {
         parent::setUp();
@@ -29,7 +30,6 @@ class CheckoutOnepageSuccessTest extends PageTestCase
     protected function tearDown(): void
     {
         $this->_objectManager->removeSharedInstance(CheckoutSession::class);
-        parent::tearDown();
     }
 
     /**

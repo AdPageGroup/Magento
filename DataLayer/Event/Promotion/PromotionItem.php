@@ -4,12 +4,6 @@ namespace Tagging\GTM\DataLayer\Event\Promotion;
 
 class PromotionItem
 {
-    private string $id;
-    private string $name;
-    private string $createName;
-    private string $createSlot;
-    private string $locationId;
-
     /**
      * @param string $id
      * @param string $name
@@ -17,18 +11,8 @@ class PromotionItem
      * @param string $createSlot
      * @param string $locationId
      */
-    public function __construct(
-        string $id,
-        string $name,
-        string $createName = '',
-        string $createSlot = '',
-        string $locationId = ''
-    ) {
-        $this->id = $id;
-        $this->name = $name;
-        $this->createName = $createName;
-        $this->createSlot = $createSlot;
-        $this->locationId = $locationId;
+    public function __construct(private readonly string $id, private readonly string $name, private readonly string $createName = '', private readonly string $createSlot = '', private readonly string $locationId = '')
+    {
     }
 
     public function get(): array

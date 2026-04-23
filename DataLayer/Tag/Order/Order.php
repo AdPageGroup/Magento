@@ -11,31 +11,19 @@ use Tagging\GTM\Util\PriceFormatter;
 
 class Order implements MergeTagInterface
 {
-    private CheckoutSession $checkoutSession;
-    private OrderRepositoryInterface $orderRepository;
-    private Config $config;
-    private PriceFormatter $priceFormatter;
-
     /**
      * @param CheckoutSession $checkoutSession
      * @param OrderRepositoryInterface $orderRepository
      * @param Config $config
      */
-    public function __construct(
-        CheckoutSession $checkoutSession,
-        OrderRepositoryInterface $orderRepository,
-        Config $config,
-        PriceFormatter $priceFormatter
-    ) {
-        $this->checkoutSession = $checkoutSession;
-        $this->orderRepository = $orderRepository;
-        $this->config = $config;
-        $this->priceFormatter = $priceFormatter;
+    public function __construct(private readonly CheckoutSession $checkoutSession, private readonly OrderRepositoryInterface $orderRepository, private readonly Config $config, private readonly PriceFormatter $priceFormatter)
+    {
     }
 
     /**
      * @return array
      */
+    #[\Override]
     public function merge(): array
     {
         $order = $this->getOrder();

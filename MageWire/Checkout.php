@@ -10,21 +10,8 @@ use Tagging\GTM\DataLayer\Event\BeginCheckout;
 
 class Checkout extends Component
 {
-    private CheckoutSession $checkoutSession;
-    private BeginCheckout $beginCheckout;
-    private AddShippingInfo $addShippingInfo;
-    private AddPaymentInfo $addPaymentInfo;
-
-    public function __construct(
-        CheckoutSession $checkoutSession,
-        BeginCheckout $beginCheckout,
-        AddShippingInfo $addShippingInfo,
-        AddPaymentInfo $addPaymentInfo
-    ) {
-        $this->checkoutSession = $checkoutSession;
-        $this->beginCheckout = $beginCheckout;
-        $this->addShippingInfo = $addShippingInfo;
-        $this->addPaymentInfo = $addPaymentInfo;
+    public function __construct(private readonly CheckoutSession $checkoutSession, private readonly BeginCheckout $beginCheckout, private readonly AddShippingInfo $addShippingInfo, private readonly AddPaymentInfo $addPaymentInfo)
+    {
     }
 
     public function boot(): void

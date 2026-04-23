@@ -10,17 +10,11 @@ use Tagging\GTM\DataLayer\Event\AddToCart as AddToCartEvent;
 
 class TriggerAddToCartDataLayerEvent implements ObserverInterface
 {
-    private CheckoutSessionDataProviderInterface $checkoutSessionDataProvider;
-    private AddToCartEvent $addToCartEvent;
-
-    public function __construct(
-        CheckoutSessionDataProviderInterface $checkoutSessionDataProvider,
-        AddToCartEvent $addToCartEvent
-    ) {
-        $this->checkoutSessionDataProvider = $checkoutSessionDataProvider;
-        $this->addToCartEvent = $addToCartEvent;
+    public function __construct(private readonly CheckoutSessionDataProviderInterface $checkoutSessionDataProvider, private readonly AddToCartEvent $addToCartEvent)
+    {
     }
 
+    #[\Override]
     public function execute(Observer $observer)
     {
         /** @var ProductInterface $product */

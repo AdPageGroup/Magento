@@ -25,16 +25,6 @@ use Tagging\GTM\Config\Config;
 
 class AddDataToCustomerSection
 {
-    private CustomerSession $customerSession;
-    private GroupRepositoryInterface $groupRepository;
-    private CustomerSessionDataProviderInterface $customerSessionDataProvider;
-    private CustomerDataMapper $customerDataMapper;
-    private CustomerRepositoryInterface $customerRepository;
-    private CollectionFactory $orderCollectionFactory;
-    private LoggerInterface $logger;
-    private Debugger $debugger;
-    private Config $config;
-
     /**
      * Customer constructor.
      * @param CustomerSession $customerSession
@@ -43,36 +33,17 @@ class AddDataToCustomerSection
      * @param CustomerDataMapper $customerDataMapper
      * @param CustomerRepositoryInterface $customerRepository
      */
-    public function __construct(
-        CustomerSession $customerSession,
-        GroupRepositoryInterface $groupRepository,
-        CustomerSessionDataProviderInterface $customerSessionDataProvider,
-        CustomerDataMapper $customerDataMapper,
-        CustomerRepositoryInterface $customerRepository,
-        CollectionFactory $orderCollectionFactory,
-        LoggerInterface $logger,
-        Debugger $debugger,
-        Config $config
-    ) {
-        $this->customerSession = $customerSession;
-        $this->groupRepository = $groupRepository;
-        $this->customerSessionDataProvider = $customerSessionDataProvider;
-        $this->customerDataMapper = $customerDataMapper;
-        $this->customerRepository = $customerRepository;
-        $this->orderCollectionFactory = $orderCollectionFactory;
-        $this->logger = $logger;
-        $this->debugger = $debugger;
-        $this->config = $config;
+    public function __construct(private readonly CustomerSession $customerSession, private readonly GroupRepositoryInterface $groupRepository, private readonly CustomerSessionDataProviderInterface $customerSessionDataProvider, private readonly CustomerDataMapper $customerDataMapper, private readonly CustomerRepositoryInterface $customerRepository, private readonly CollectionFactory $orderCollectionFactory, private readonly LoggerInterface $logger, private readonly Debugger $debugger, private readonly Config $config)
+    {
     }
 
     /**
      * @param CustomerData $subject
-     * @param mixed $result
      * @return mixed
      * @throws LocalizedException
      * @throws NoSuchEntityException
      */
-    public function afterGetSectionData(CustomerData $subject, $result)
+    public function afterGetSectionData(CustomerData $subject, mixed $result)
     {
         if (!is_array($result)) {
             return $result;

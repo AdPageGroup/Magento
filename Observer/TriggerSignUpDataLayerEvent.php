@@ -9,17 +9,11 @@ use Tagging\GTM\DataLayer\Event\SignUp as SignUpEvent;
 
 class TriggerSignUpDataLayerEvent implements ObserverInterface
 {
-    private CustomerSessionDataProviderInterface $customerSessionDataProvider;
-    private SignUpEvent $signUpEvent;
-
-    public function __construct(
-        CustomerSessionDataProviderInterface $customerSessionDataProvider,
-        SignUpEvent $signUpEvent
-    ) {
-        $this->customerSessionDataProvider = $customerSessionDataProvider;
-        $this->signUpEvent = $signUpEvent;
+    public function __construct(private readonly CustomerSessionDataProviderInterface $customerSessionDataProvider, private readonly SignUpEvent $signUpEvent)
+    {
     }
 
+    #[\Override]
     public function execute(Observer $observer)
     {
         $eventData = $this->signUpEvent->get();

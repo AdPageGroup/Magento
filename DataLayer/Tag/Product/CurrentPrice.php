@@ -10,25 +10,19 @@ use Tagging\GTM\Util\PriceFormatter;
 
 class CurrentPrice implements TagInterface
 {
-    private GetCurrentProduct $getCurrentProduct;
-    private PriceFormatter $priceFormatter;
-
     /**
      * @param GetCurrentProduct $getCurrentProduct
      * @param PriceFormatter $priceFormatter
      */
-    public function __construct(
-        GetCurrentProduct $getCurrentProduct,
-        PriceFormatter $priceFormatter
-    ) {
-        $this->getCurrentProduct = $getCurrentProduct;
-        $this->priceFormatter = $priceFormatter;
+    public function __construct(private readonly GetCurrentProduct $getCurrentProduct, private readonly PriceFormatter $priceFormatter)
+    {
     }
 
     /**
      * @return float
      * @throws NoSuchEntityException
      */
+    #[\Override]
     public function get(): float
     {
         $product = $this->getCurrentProduct->get();

@@ -10,31 +10,22 @@ use Tagging\GTM\DataLayer\Event\AddPaymentInfo;
 
 class TriggerAddPaymentInfoDataLayerEvent
 {
-    private CheckoutSessionDataProviderInterface $checkoutSessionDataProvider;
-    private AddPaymentInfo $addPaymentInfo;
-
-    public function __construct(
-        CheckoutSessionDataProviderInterface $checkoutSessionDataProvider,
-        AddPaymentInfo $addPaymentInfo
-    ) {
-        $this->checkoutSessionDataProvider = $checkoutSessionDataProvider;
-        $this->addPaymentInfo = $addPaymentInfo;
+    public function __construct(private readonly CheckoutSessionDataProviderInterface $checkoutSessionDataProvider, private readonly AddPaymentInfo $addPaymentInfo)
+    {
     }
 
     /**
      * @param PaymentInformationManagementInterface $subject
-     * @param mixed $orderId
-     * @param mixed $cartId
      * @param PaymentInterface $paymentMethod
      * @param AddressInterface|null $billingAddress
      * @return mixed
      */
     public function afterSavePaymentInformationAndPlaceOrder(
         PaymentInformationManagementInterface $subject,
-        $orderId,
-        $cartId,
+        mixed $orderId,
+        mixed $cartId,
         PaymentInterface $paymentMethod,
-        AddressInterface $billingAddress = null
+        ?AddressInterface $billingAddress = null
     ) {
         $addPaymentInfoEventData = $this->addPaymentInfo
             ->setPaymentMethod($paymentMethod->getMethod())
@@ -58,7 +49,7 @@ class TriggerAddPaymentInfoDataLayerEvent
         $orderId,
         $cartId,
         PaymentInterface $paymentMethod,
-        AddressInterface $billingAddress = null
+        ?AddressInterface $billingAddress = null
     ) {
         $addPaymentInfoEventData = $this->addPaymentInfo
             ->setPaymentMethod($paymentMethod->getMethod())

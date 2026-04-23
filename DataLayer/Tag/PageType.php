@@ -7,14 +7,11 @@ use Tagging\GTM\Api\Data\TagInterface;
 
 class PageType implements TagInterface
 {
-    private RequestInterface $request;
-
-    public function __construct(
-        RequestInterface $request
-    ) {
-        $this->request = $request;
+    public function __construct(private readonly RequestInterface $request)
+    {
     }
 
+    #[\Override]
     public function get(): string
     {
         $controllerName = $this->request->getControllerName(); // @phpstan-ignore-line

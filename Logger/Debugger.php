@@ -11,36 +11,21 @@ use Tagging\GTM\Config\Config;
 class Debugger
 {
     /**
-     * @var Config
-     */
-    private $config;
-
-    /**
-     * @var LoggerInterface
-     */
-    private $logger;
-
-    /**
      * Debugger constructor.
      *
      * @param Config $config
      * @param LoggerInterface $logger
      */
-    public function __construct(
-        Config $config,
-        LoggerInterface $logger
-    ) {
-        $this->config = $config;
-        $this->logger = $logger;
+    public function __construct(private readonly Config $config, private readonly LoggerInterface $logger)
+    {
     }
 
     /**
      * @param string $msg
-     * @param mixed $data
      *
      * @return bool
      */
-    public function debug(string $msg, $data = null): bool
+    public function debug(string $msg, mixed $data = null): bool
     {
         if ($this->config->isDebug() === false) {
             return false;

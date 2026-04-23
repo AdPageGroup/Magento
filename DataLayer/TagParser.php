@@ -31,11 +31,10 @@ class TagParser
 
     /**
      * @param string $tagName
-     * @param mixed $tagValue
      * @param array $data
      * @return array
      */
-    private function convertTag($tagName, $tagValue, array $data): array
+    private function convertTag($tagName, mixed $tagValue, array $data): array
     {
         if ($tagValue instanceof MergeTagInterface) {
             unset($data[$tagName]);
@@ -74,6 +73,6 @@ class TagParser
             return $tagValueObject->get();
         }
 
-        throw new RuntimeException('Unknown object in data layer: ' . get_class($tagValueObject));
+        throw new RuntimeException('Unknown object in data layer: ' . $tagValueObject::class);
     }
 }

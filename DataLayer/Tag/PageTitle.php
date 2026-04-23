@@ -7,14 +7,11 @@ use Tagging\GTM\Api\Data\TagInterface;
 
 class PageTitle implements TagInterface
 {
-    private Title $pageTitle;
-
-    public function __construct(
-        Title $pageTitle
-    ) {
-        $this->pageTitle = $pageTitle;
+    public function __construct(private readonly Title $pageTitle)
+    {
     }
 
+    #[\Override]
     public function get(): string
     {
         return $this->pageTitle->get();

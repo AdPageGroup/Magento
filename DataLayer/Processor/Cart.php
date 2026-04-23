@@ -9,6 +9,7 @@ class Cart implements ProcessorInterface
     /**
      * @inheritDoc
      */
+    #[\Override]
     public function process(array $data): array
     {
         return $data;

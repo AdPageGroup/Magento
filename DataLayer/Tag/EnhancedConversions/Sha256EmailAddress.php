@@ -9,21 +9,15 @@ use Tagging\GTM\Api\Data\TagInterface;
 
 class Sha256EmailAddress implements TagInterface
 {
-    private CheckoutSession $checkoutSession;
-    private OrderRepositoryInterface $orderRepository;
-
     /**
      * @param CheckoutSession $checkoutSession
      * @param OrderRepositoryInterface $orderRepository
      */
-    public function __construct(
-        CheckoutSession $checkoutSession,
-        OrderRepositoryInterface $orderRepository
-    ) {
-        $this->checkoutSession = $checkoutSession;
-        $this->orderRepository = $orderRepository;
+    public function __construct(private readonly CheckoutSession $checkoutSession, private readonly OrderRepositoryInterface $orderRepository)
+    {
     }
 
+    #[\Override]
     public function get(): string
     {
         $order = $this->getOrder();

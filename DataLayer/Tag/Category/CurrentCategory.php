@@ -9,25 +9,19 @@ use Tagging\GTM\Util\GetCurrentCategory;
 
 class CurrentCategory implements MergeTagInterface
 {
-    private GetCurrentCategory $getCurrentCategory;
-    private CategoryDataMapper $categoryDataMapper;
-
     /**
      * @param GetCurrentCategory $getCurrentCategory
      * @param CategoryDataMapper $categoryDataMapper
      */
-    public function __construct(
-        GetCurrentCategory $getCurrentCategory,
-        CategoryDataMapper $categoryDataMapper
-    ) {
-        $this->getCurrentCategory = $getCurrentCategory;
-        $this->categoryDataMapper = $categoryDataMapper;
+    public function __construct(private readonly GetCurrentCategory $getCurrentCategory, private readonly CategoryDataMapper $categoryDataMapper)
+    {
     }
 
     /**
      * @return string[]
      * @throws NoSuchEntityException
      */
+    #[\Override]
     public function merge(): array
     {
         $currentCategory = $this->getCurrentCategory->get();

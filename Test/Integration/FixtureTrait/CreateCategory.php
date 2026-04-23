@@ -26,7 +26,7 @@ trait CreateCategory
         /** @var $category Category */
         $category = $categoryFactory->create();
         $category->setId($id)
-            ->setName(isset($data['name']) ? $data['name'] : 'Category ' . $id)
+            ->setName($data['name'] ?? 'Category ' . $id)
             ->setParentId($parentId)
             ->setPath('1/' . $parentId . '/' . $id)
             ->setUrlKey('category' . $id)

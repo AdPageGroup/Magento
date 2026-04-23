@@ -15,30 +15,8 @@ use Tagging\GTM\Logger\Debugger;
 
 class PurchaseWebhookEvent
 {
-    private $json;
-    private $clientFactory;
-    private $config;
-    private $orderItems;
-    private $priceFormatter;
-    private LoggerInterface $logger;
-    private Debugger $debugger;
-
-    public function __construct(
-        Json            $json,
-        ClientFactory   $clientFactory,
-        OrderItems      $orderItems,
-        Config          $config,
-        PriceFormatter  $priceFormatter,
-        LoggerInterface $logger,
-        Debugger $debugger
-    ) {
-        $this->json = $json;
-        $this->clientFactory = $clientFactory;
-        $this->orderItems = $orderItems;
-        $this->config = $config;
-        $this->priceFormatter = $priceFormatter;
-        $this->logger = $logger;
-        $this->debugger = $debugger;
+    public function __construct(private readonly Json            $json, private readonly ClientFactory   $clientFactory, private readonly OrderItems      $orderItems, private readonly Config          $config, private readonly PriceFormatter  $priceFormatter, private readonly LoggerInterface $logger, private readonly Debugger $debugger)
+    {
     }
 
     public function purchase(OrderInterface $order)

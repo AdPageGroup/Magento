@@ -15,12 +15,6 @@ use Tagging\GTM\Util\PriceFormatter;
 
 class OrderItemDataMapper
 {
-    private OrderRepositoryInterface $orderRepository;
-    private ProductDataMapper $productDataMapper;
-    private ProductRepositoryInterface $productRepository;
-    private PriceFormatter $priceFormatter;
-    private ScopeConfigInterface $scopeConfig;
-
     /**
      * @param OrderRepositoryInterface $orderRepository
      * @param ProductDataMapper $productDataMapper
@@ -28,18 +22,8 @@ class OrderItemDataMapper
      * @param PriceFormatter $priceFormatter
      * @param ScopeConfigInterface $scopeConfig
      */
-    public function __construct(
-        OrderRepositoryInterface $orderRepository,
-        ProductDataMapper $productDataMapper,
-        ProductRepositoryInterface $productRepository,
-        PriceFormatter $priceFormatter,
-        ScopeConfigInterface $scopeConfig
-    ) {
-        $this->orderRepository = $orderRepository;
-        $this->productDataMapper = $productDataMapper;
-        $this->productRepository = $productRepository;
-        $this->priceFormatter = $priceFormatter;
-        $this->scopeConfig = $scopeConfig;
+    public function __construct(private readonly OrderRepositoryInterface $orderRepository, private readonly ProductDataMapper $productDataMapper, private readonly ProductRepositoryInterface $productRepository, private readonly PriceFormatter $priceFormatter, private readonly ScopeConfigInterface $scopeConfig)
+    {
     }
 
     /**
@@ -67,7 +51,7 @@ class OrderItemDataMapper
 
         try {
             $product = $this->productRepository->get($orderItem->getSku());
-        } catch (NoSuchEntityException $e) {
+        } catch (NoSuchEntityException) {
             return $orderItemData;
         }
 
@@ -89,16 +73,10 @@ class OrderItemDataMapper
             $orderItem->getStoreId()
         );
 
-        switch ($displayType) {
-            case Config::DISPLAY_TYPE_EXCLUDING_TAX:
-            case Config::DISPLAY_TYPE_BOTH:
-                $price = $orderItem->getPrice();
-                break;
-            case Config::DISPLAY_TYPE_INCLUDING_TAX:
-            default:
-                $price = $orderItem->getPriceInclTax();
-                break;
-        }
+        $price = match ($displayType) {
+            Config::DISPLAY_TYPE_EXCLUDING_TAX, Config::DISPLAY_TYPE_BOTH => $orderItem->getPrice(),
+            default => $orderItem->getPriceInclTax(),
+        };
 
         return $this->priceFormatter->format((float)$price);
     }

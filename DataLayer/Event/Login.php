@@ -10,12 +10,9 @@ use Tagging\GTM\DataLayer\Mapper\CustomerDataMapper;
 class Login implements EventInterface
 {
     private CustomerInterface $customer;
-    private CustomerDataMapper $customerDataMapper;
 
-    public function __construct(
-        CustomerDataMapper $customerDataMapper
-    ) {
-        $this->customerDataMapper = $customerDataMapper;
+    public function __construct(private readonly CustomerDataMapper $customerDataMapper)
+    {
     }
 
     public function setCustomer(CustomerInterface $customer): Login
@@ -24,6 +21,7 @@ class Login implements EventInterface
         return $this;
     }
 
+    #[\Override]
     public function get(): array
     {
         return [

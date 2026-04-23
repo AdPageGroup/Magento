@@ -21,10 +21,6 @@ use Tagging\GTM\Config\Config;
  */
 class Commons implements ArgumentInterface
 {
-    private DataLayer $dataLayer;
-    private Config $config;
-    private SerializerInterface $serializer;
-
     /**
      * Commons constructor.
      *
@@ -32,14 +28,8 @@ class Commons implements ArgumentInterface
      * @param Config $config
      * @param SerializerInterface $serializer
      */
-    public function __construct(
-        DataLayer $dataLayer,
-        Config $config,
-        SerializerInterface $serializer
-    ) {
-        $this->dataLayer = $dataLayer;
-        $this->config = $config;
-        $this->serializer = $serializer;
+    public function __construct(private readonly DataLayer $dataLayer, private readonly Config $config, private readonly SerializerInterface $serializer)
+    {
     }
 
     /**

@@ -13,21 +13,11 @@ use Tagging\GTM\DataLayer\Tag\Store\CurrentStore;
 
 class UserData implements EventInterface
 {
-    private PageTitle $pageTitle;
-    private PageType $pageType;
-    private CurrentStore $currentStore;
-
     /**
      * @param Customer $cartItems
      */
-    public function __construct(
-        PageTitle $pageTitle,
-        PageType $pageType,
-        CurrentStore $currentStore
-    ) {
-        $this->pageTitle = $pageTitle;
-        $this->pageType = $pageType;
-        $this->currentStore = $currentStore;
+    public function __construct(private readonly PageTitle $pageTitle, private readonly PageType $pageType, private readonly CurrentStore $currentStore)
+    {
     }
 
     /**
@@ -35,6 +25,7 @@ class UserData implements EventInterface
      * @throws LocalizedException
      * @throws NoSuchEntityException
      */
+    #[\Override]
     public function get(): array
     {
         return [

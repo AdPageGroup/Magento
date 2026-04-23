@@ -22,7 +22,7 @@ class ViewCartTest extends TestCase
      * @magentoAppArea frontend
      * @magentoAppIsolation enabled
      */
-    public function testValidViewCartEvent()
+    public function testValidViewCartEvent(): never
     {
         $this->markTestSkipped('Broken test');
         $om = ObjectManager::getInstance();

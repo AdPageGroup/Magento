@@ -10,9 +10,6 @@ use Tagging\GTM\Exception\NotUsingSetProductSkusException;
 
 class ProductProvider
 {
-    private ProductRepositoryInterface $productRepository;
-    private SearchCriteriaBuilder $searchCriteriaBuilder;
-
     /**
      * @var string[]
      */
@@ -23,12 +20,8 @@ class ProductProvider
      */
     private array $loadedProducts = [];
 
-    public function __construct(
-        ProductRepositoryInterface $productRepository,
-        SearchCriteriaBuilder $searchCriteriaBuilder
-    ) {
-        $this->productRepository = $productRepository;
-        $this->searchCriteriaBuilder = $searchCriteriaBuilder;
+    public function __construct(private readonly ProductRepositoryInterface $productRepository, private readonly SearchCriteriaBuilder $searchCriteriaBuilder)
+    {
     }
 
     /**

@@ -10,17 +10,11 @@ use Tagging\GTM\DataLayer\Event\AddToWishlist as AddToWishlistEvent;
 
 class TriggerAddToWishlistDataLayerEvent implements ObserverInterface
 {
-    private CustomerSessionDataProviderInterface $customerSessionDataProvider;
-    private AddToWishlistEvent $addToWishlistEvent;
-
-    public function __construct(
-        CustomerSessionDataProviderInterface $customerSessionDataProvider,
-        AddToWishlistEvent $addToWishlistEvent
-    ) {
-        $this->customerSessionDataProvider = $customerSessionDataProvider;
-        $this->addToWishlistEvent = $addToWishlistEvent;
+    public function __construct(private readonly CustomerSessionDataProviderInterface $customerSessionDataProvider, private readonly AddToWishlistEvent $addToWishlistEvent)
+    {
     }
 
+    #[\Override]
     public function execute(Observer $observer)
     {
         /** @var ProductInterface $product */

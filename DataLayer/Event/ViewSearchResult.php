@@ -8,6 +8,7 @@ class ViewSearchResult implements EventInterface
 {
     private ?string $searchTerm = null;
 
+    #[\Override]
     public function get(): array
     {
         return [

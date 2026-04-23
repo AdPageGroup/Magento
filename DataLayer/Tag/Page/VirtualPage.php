@@ -8,14 +8,11 @@ use Tagging\GTM\Api\Data\TagInterface;
 
 class VirtualPage implements TagInterface
 {
-    private StoreManagerInterface $storeManager;
-
-    public function __construct(
-        StoreManagerInterface $storeManager
-    ) {
-        $this->storeManager = $storeManager;
+    public function __construct(private readonly StoreManagerInterface $storeManager)
+    {
     }
 
+    #[\Override]
     public function get(): string
     {
         /** @var Store $store */

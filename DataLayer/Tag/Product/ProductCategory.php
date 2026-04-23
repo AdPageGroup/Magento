@@ -11,21 +11,19 @@ use Tagging\GTM\Util\CategoryProvider;
 class ProductCategory implements ProductTagInterface
 {
     private Product $product;
-    private CategoryProvider $categoryProvider;
 
     /**
      * @param CategoryProvider $categoryProvider
      */
-    public function __construct(
-        CategoryProvider $categoryProvider
-    ) {
-        $this->categoryProvider = $categoryProvider;
+    public function __construct(private readonly CategoryProvider $categoryProvider)
+    {
     }
 
     /**
      * @param Product $product
      * @return $this
      */
+    #[\Override]
     public function setProduct(Product $product): ProductCategory
     {
         $this->product = $product;
@@ -35,6 +33,7 @@ class ProductCategory implements ProductTagInterface
     /**
      * @return string
      */
+    #[\Override]
     public function get(): string
     {
         /** @var Category|null $category */
@@ -45,7 +44,7 @@ class ProductCategory implements ProductTagInterface
 
         try {
             return $this->categoryProvider->getFirstByProduct($this->product)->getName();
-        } catch (NoSuchEntityException $e) {
+        } catch (NoSuchEntityException) {
             return '';
         }
     }

@@ -13,27 +13,14 @@ use Tagging\GTM\DataLayer\Tag\CurrencyCode;
 
 class ViewCart implements EventInterface
 {
-    private CartItems $cartItems;
-    private CartValue $cartValue;
-    private CurrencyCode $currencyCode;
-    private Config $config;
-
     /**
      * @param CartItems $cartItems
      * @param CartValue $cartValue
      * @param CurrencyCode $currencyCode
      * @param Config $config
      */
-    public function __construct(
-        CartItems $cartItems,
-        CartValue $cartValue,
-        CurrencyCode $currencyCode,
-        Config $config
-    ) {
-        $this->cartItems = $cartItems;
-        $this->cartValue = $cartValue;
-        $this->currencyCode = $currencyCode;
-        $this->config = $config;
+    public function __construct(private readonly CartItems $cartItems, private readonly CartValue $cartValue, private readonly CurrencyCode $currencyCode, private readonly Config $config)
+    {
     }
 
     /**
@@ -41,6 +28,7 @@ class ViewCart implements EventInterface
      * @throws LocalizedException
      * @throws NoSuchEntityException
      */
+    #[\Override]
     public function get(): array
     {
         return [

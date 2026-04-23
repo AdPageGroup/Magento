@@ -7,20 +7,17 @@ use Tagging\GTM\Api\CheckoutSessionDataProviderInterface;
 
 class GtmCheckout implements SectionSourceInterface
 {
-    private CheckoutSessionDataProviderInterface $checkoutSessionDataProvider;
-
     /**
      * @param CheckoutSessionDataProviderInterface $checkoutSessionDataProvider
      */
-    public function __construct(
-        CheckoutSessionDataProviderInterface $checkoutSessionDataProvider
-    ) {
-        $this->checkoutSessionDataProvider = $checkoutSessionDataProvider;
+    public function __construct(private readonly CheckoutSessionDataProviderInterface $checkoutSessionDataProvider)
+    {
     }
 
     /**
      * @return array
      */
+    #[\Override]
     public function getSectionData(): array
     {
         $gtmEvents = $this->checkoutSessionDataProvider->get();

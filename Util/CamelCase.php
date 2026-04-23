@@ -18,7 +18,7 @@ class CamelCase
      */
     public function from(string $string): string
     {
-        return strtolower(trim(preg_replace('/([A-Z]|[0-9]+)/', "_$1", $string), '_'));
+        return strtolower(trim((string) preg_replace('/([A-Z]|[0-9]+)/', "_$1", $string), '_'));
     }
 
     /**

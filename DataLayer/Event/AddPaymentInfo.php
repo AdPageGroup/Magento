@@ -10,9 +10,6 @@ use Tagging\GTM\Util\PriceFormatter;
 
 class AddPaymentInfo implements EventInterface
 {
-    private CartItems $cartItems;
-    private CartRepositoryInterface $cartRepository;
-    private PriceFormatter $priceFormatter;
     private int $cartId;
     private string $paymentMethod;
 
@@ -20,19 +17,14 @@ class AddPaymentInfo implements EventInterface
      * @param CartRepositoryInterface $cartRepository
      * @param CartItems $cartItems
      */
-    public function __construct(
-        CartRepositoryInterface  $cartRepository,
-        CartItems $cartItems,
-        PriceFormatter $priceFormatter
-    ) {
-        $this->cartItems = $cartItems;
-        $this->cartRepository = $cartRepository;
-        $this->priceFormatter = $priceFormatter;
+    public function __construct(private readonly CartRepositoryInterface  $cartRepository, private readonly CartItems $cartItems, private readonly PriceFormatter $priceFormatter)
+    {
     }
 
     /**
      * @return string[]
      */
+    #[\Override]
     public function get(): array
     {
         /** @var Cart $cart */

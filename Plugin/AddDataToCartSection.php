@@ -17,23 +17,13 @@ use Tagging\GTM\SessionDataProvider\CheckoutSessionDataProvider;
 
 class AddDataToCartSection
 {
-    private CheckoutCart $checkoutCart;
-    private CheckoutSessionDataProvider $checkoutSessionDataProvider;
-    private ViewCartEvent $viewCartEvent;
-
     /**
      * @param CheckoutCart $checkoutCart
      * @param CheckoutSessionDataProvider $checkoutSessionDataProvider
      * @param ViewCartEvent $viewCartEvent
      */
-    public function __construct(
-        CheckoutCart $checkoutCart,
-        CheckoutSessionDataProvider $checkoutSessionDataProvider,
-        ViewCartEvent $viewCartEvent
-    ) {
-        $this->checkoutCart = $checkoutCart;
-        $this->checkoutSessionDataProvider = $checkoutSessionDataProvider;
-        $this->viewCartEvent = $viewCartEvent;
+    public function __construct(private readonly CheckoutCart $checkoutCart, private readonly CheckoutSessionDataProvider $checkoutSessionDataProvider, private readonly ViewCartEvent $viewCartEvent)
+    {
     }
 
     /**

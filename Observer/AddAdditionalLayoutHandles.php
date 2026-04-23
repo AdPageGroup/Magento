@@ -9,17 +9,11 @@ use Magento\Framework\View\LayoutInterface;
 
 class AddAdditionalLayoutHandles implements ObserverInterface
 {
-    private RequestInterface $request;
-    private LayoutInterface $layout;
-
-    public function __construct(
-        Request $request,
-        LayoutInterface $layout
-    ) {
-        $this->request = $request;
-        $this->layout = $layout;
+    public function __construct(private readonly RequestInterface $request, private readonly LayoutInterface $layout)
+    {
     }
 
+    #[\Override]
     public function execute(Observer $observer)
     {
         $handles = [];

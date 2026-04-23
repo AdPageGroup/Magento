@@ -16,6 +16,7 @@ class ViewPromotion implements EventInterface
     /**
      * @return array
      */
+    #[\Override]
     public function get(): array
     {
         $promotionsItemsData = [];

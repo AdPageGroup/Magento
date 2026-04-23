@@ -9,25 +9,20 @@ use Tagging\GTM\Api\Data\TagInterface;
 
 class OrderItems implements TagInterface
 {
-    private CheckoutSession $checkoutSession;
-    private OrderItemDataMapper $orderItemDataMapper;
     private ?OrderInterface $order = null;
 
     /**
      * @param CheckoutSession $checkoutSession
      * @param OrderItemDataMapper $orderItemDataMapper
      */
-    public function __construct(
-        CheckoutSession $checkoutSession,
-        OrderItemDataMapper $orderItemDataMapper
-    ) {
-        $this->checkoutSession = $checkoutSession;
-        $this->orderItemDataMapper = $orderItemDataMapper;
+    public function __construct(private readonly CheckoutSession $checkoutSession, private readonly OrderItemDataMapper $orderItemDataMapper)
+    {
     }
 
     /**
      * @return array
      */
+    #[\Override]
     public function get(): array
     {
         $order = $this->order;

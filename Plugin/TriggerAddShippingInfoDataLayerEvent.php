@@ -10,28 +10,20 @@ use Tagging\GTM\DataLayer\Event\AddShippingInfo;
 
 class TriggerAddShippingInfoDataLayerEvent
 {
-    private CheckoutSessionDataProviderInterface $checkoutSessionDataProvider;
-    private AddShippingInfo $addShippingInfo;
-
-    public function __construct(
-        CheckoutSessionDataProviderInterface $checkoutSessionDataProvider,
-        AddShippingInfo $addShippingInfo
-    ) {
-        $this->checkoutSessionDataProvider = $checkoutSessionDataProvider;
-        $this->addShippingInfo = $addShippingInfo;
+    public function __construct(private readonly CheckoutSessionDataProviderInterface $checkoutSessionDataProvider, private readonly AddShippingInfo $addShippingInfo)
+    {
     }
 
     /**
      * @param ShippingInformationManagementInterface $subject
      * @param PaymentDetailsInterface $paymentDetails
-     * @param mixed $cartId
      * @param ShippingInformationInterface $addressInformation
      * @return PaymentDetailsInterface
      */
     public function afterSaveAddressInformation(
         ShippingInformationManagementInterface $subject,
         PaymentDetailsInterface $paymentDetails,
-        $cartId,
+        mixed $cartId,
         ShippingInformationInterface $addressInformation
     ) {
 
