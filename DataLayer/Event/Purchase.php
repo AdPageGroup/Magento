@@ -6,6 +6,7 @@ namespace Tagging\GTM\DataLayer\Event;
 
 use Magento\Sales\Api\Data\OrderInterface;
 use Tagging\GTM\Api\Data\EventInterface;
+use Tagging\GTM\Api\NewCustomerResolverInterface;
 use Tagging\GTM\Config\Config;
 use Tagging\GTM\DataLayer\Tag\Order\OrderItems;
 use Tagging\GTM\Util\PriceFormatter;
@@ -16,15 +17,18 @@ class Purchase implements EventInterface
     private OrderItems $orderItems;
     private Config $config;
     private PriceFormatter $priceFormatter;
+    private NewCustomerResolverInterface $newCustomerResolver;
 
     public function __construct(
         OrderItems $orderItems,
         Config $config,
-        PriceFormatter $priceFormatter
+        PriceFormatter $priceFormatter,
+        NewCustomerResolverInterface $newCustomerResolver
     ) {
         $this->orderItems = $orderItems;
         $this->config = $config;
         $this->priceFormatter = $priceFormatter;
+        $this->newCustomerResolver = $newCustomerResolver;
     }
 
     /**
@@ -81,7 +85,7 @@ class Purchase implements EventInterface
             'email' => $order->getCustomerEmail() ?? '',
             'first_name' => $order->getCustomerFirstname() ?? '',
             'last_name' => $order->getCustomerLastname() ?? '',
-            'new_customer' => $order->getCustomerIsGuest() ? 'true' : 'false'
+            'new_customer' => $this->newCustomerResolver->isNewCustomer($order) ? 'true' : 'false'
         ];
     }
 
