@@ -19,7 +19,7 @@
 
                 <argument name="data_layer_events" xsi:type="array">
                     <item name="purchase_event" xsi:type="array">
-                        <item name="event" xsi:type="string">trytagging_purchase</item>
+                        <item name="event" xsi:type="string">trytagging_purchase2</item>
                         <item name="ecommerce" xsi:type="array">
                             <item name="order" xsi:type="object">Tagging\GTM\DataLayer\Tag\Order\Order</item>
                             <item name="items" xsi:type="object">Tagging\GTM\DataLayer\Tag\Order\OrderItems</item>
