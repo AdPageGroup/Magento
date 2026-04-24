@@ -6,6 +6,7 @@ namespace Tagging\GTM\DataLayer\Event;
 
 use Magento\Framework\HTTP\ClientFactory;
 use Magento\Framework\Serialize\Serializer\Json;
+use Tagging\GTM\Api\NewCustomerResolverInterface;
 use Tagging\GTM\DataLayer\Tag\Order\OrderItems;
 use Magento\Sales\Api\Data\OrderInterface;
 use Tagging\GTM\Util\PriceFormatter;
@@ -22,6 +23,7 @@ class PurchaseWebhookEvent
     private $priceFormatter;
     private LoggerInterface $logger;
     private Debugger $debugger;
+    private NewCustomerResolverInterface $newCustomerResolver;
 
     public function __construct(
         Json            $json,
@@ -30,7 +32,8 @@ class PurchaseWebhookEvent
         Config          $config,
         PriceFormatter  $priceFormatter,
         LoggerInterface $logger,
-        Debugger $debugger
+        Debugger $debugger,
+        NewCustomerResolverInterface $newCustomerResolver
     ) {
         $this->json = $json;
         $this->clientFactory = $clientFactory;
@@ -39,6 +42,7 @@ class PurchaseWebhookEvent
         $this->priceFormatter = $priceFormatter;
         $this->logger = $logger;
         $this->debugger = $debugger;
+        $this->newCustomerResolver = $newCustomerResolver;
     }
 
     public function purchase(OrderInterface $order)
@@ -122,7 +126,7 @@ class PurchaseWebhookEvent
                 "email" => $order->getCustomerEmail() ?? '',
                 "first_name" => $order->getCustomerFirstname() ?? '',
                 "last_name" => $order->getCustomerLastname() ?? '',
-                "new_customer" => (string)($order->getCustomerIsGuest() ? "true" : "false")
+                "new_customer" => (string)($this->newCustomerResolver->isNewCustomer($order) ? "true" : "false")
             ];
         } catch (\Exception $e) {
             $this->debugger->debug($e->getMessage());

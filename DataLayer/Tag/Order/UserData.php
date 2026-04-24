@@ -8,18 +8,22 @@ use Magento\Checkout\Model\Session as CheckoutSession;
 use Magento\Sales\Api\Data\OrderInterface;
 use Magento\Sales\Api\OrderRepositoryInterface;
 use Tagging\GTM\Api\Data\TagInterface;
+use Tagging\GTM\Api\NewCustomerResolverInterface;
 
 class UserData implements TagInterface
 {
     private CheckoutSession $checkoutSession;
     private OrderRepositoryInterface $orderRepository;
+    private NewCustomerResolverInterface $newCustomerResolver;
 
     public function __construct(
         CheckoutSession $checkoutSession,
-        OrderRepositoryInterface $orderRepository
+        OrderRepositoryInterface $orderRepository,
+        NewCustomerResolverInterface $newCustomerResolver
     ) {
         $this->checkoutSession = $checkoutSession;
         $this->orderRepository = $orderRepository;
+        $this->newCustomerResolver = $newCustomerResolver;
     }
 
     /**
@@ -54,7 +58,7 @@ class UserData implements TagInterface
             'email' => $order->getCustomerEmail() ?? '',
             'first_name' => $order->getCustomerFirstname() ?? '',
             'last_name' => $order->getCustomerLastname() ?? '',
-            'new_customer' => $order->getCustomerIsGuest() ? 'true' : 'false'
+            'new_customer' => $this->newCustomerResolver->isNewCustomer($order) ? 'true' : 'false'
         ];
     }
 
