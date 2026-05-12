@@ -138,7 +138,11 @@ class PurchaseWebhookEvent
 
         try {
             $url = $this->config->getGoogleTagmanagerUrl();
-            $client->post('https://' . $url . '/order_created', $this->json->serialize($data));
+            $payload = $this->json->serialize($data);
+            $this->debugger->debug('PurchaseWebhookEvent::purchase(): POST https://' . $url . '/order_created');
+            $this->debugger->debug('PurchaseWebhookEvent::purchase(): request_headers: Content-Type: application/json; Accept: application/json');
+            $this->debugger->debug('PurchaseWebhookEvent::purchase(): request_body: ' . $payload);
+            $client->post('https://' . $url . '/order_created', $payload);
             
             $statusCode = $client->getStatus();
             $this->debugger->debug('PurchaseWebhookEvent::purchase(): HTTP status code: ' . $statusCode);
