@@ -13,6 +13,11 @@
     <body>
         <referenceContainer name="after.body.start">
             <block
+                name="Tagging_GTM.debug-action"
+                template="Tagging_GTM::hyva/debug-action.phtml"
+                ifconfig="GTM/settings/enabled"
+            />
+            <block
                 name="Tagging_GTM.pusher-script"
                 template="Tagging_GTM::hyva/script-pusher.phtml"
                 ifconfig="GTM/settings/enabled"

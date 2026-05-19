@@ -2,10 +2,12 @@
 
 namespace Tagging\GTM\Observer;
 
+use Magento\Framework\App\RequestInterface;
 use Magento\Framework\Event\Observer;
 use Magento\Framework\Event\ObserverInterface;
 use Magento\Sales\Api\Data\OrderInterface;
 use Tagging\GTM\Api\CheckoutSessionDataProviderInterface;
+use Tagging\GTM\Config\Config;
 use Tagging\GTM\DataLayer\Event\Purchase as PurchaseEvent;
 use Tagging\GTM\Logger\Debugger;
 use Exception;
@@ -19,7 +21,7 @@ class TriggerPurchaseDataLayerEvent implements ObserverInterface
     public function __construct(
         CheckoutSessionDataProviderInterface $checkoutSessionDataProvider,
         PurchaseEvent $purchaseEvent,
-        Debugger $debugger
+        Debugger $debugger,
     ) {
         $this->checkoutSessionDataProvider = $checkoutSessionDataProvider;
         $this->purchaseEvent = $purchaseEvent;
@@ -31,7 +33,6 @@ class TriggerPurchaseDataLayerEvent implements ObserverInterface
         /** @var OrderInterface $order */
         $order = $observer->getData('order');
 
-        $this->debugger->debug("TriggerPurchaseDataLayerEvent::execute(): has changed ");
         $this->checkoutSessionDataProvider->add(
             'purchase_event',
             $this->purchaseEvent->setOrder($order)->get()

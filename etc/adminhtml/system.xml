@@ -84,6 +84,27 @@
                         <field id="webhook_trigger_mode">on_order_state</field>
                     </depends>
                 </field>
+                <field id="purchase_event_page_check_enabled" type="select" translate="label" sortOrder="4" showInDefault="1" showInWebsite="1" showInStore="1">
+                    <label>Check specific page to trigger purchase event</label>
+                    <comment><![CDATA[If enabled, the purchase event will only be sent when the order is placed on specific checkout pages. You can select which pages below.<br/>
+                    <b>Default:</b> Enabled (all checkout pages are selected by default)<br/>
+                    <b>If disabled:</b> Purchase event will fire from any page where an order is placed (admin, API, etc.)]]></comment>
+                    <source_model>Magento\Config\Model\Config\Source\Yesno</source_model>
+                    <depends>
+                        <field id="*/settings/enabled">1</field>
+                    </depends>
+                </field>
+                <field id="purchase_event_allowed_checkout_actions" type="multiselect" translate="label" sortOrder="5" showInDefault="1" showInWebsite="1" showInStore="1">
+                    <label>Allowed Checkout Actions for Purchase Event</label>
+                    <comment><![CDATA[Select which checkout pages/actions should trigger the purchase event. When page check is enabled, the purchase event will only fire when an order is placed on one of the selected checkout pages.<br/>
+                    <b>Default:</b> All checkout pages are enabled when page check is turned on<br/>
+                    <b>Note:</b> If page check is disabled, these selections are ignored and the event fires from any page.]]></comment>
+                    <source_model>Tagging\GTM\Model\Config\Source\CheckoutActions</source_model>
+                    <depends>
+                        <field id="*/settings/enabled">1</field>
+                        <field id="purchase_event_page_check_enabled">1</field>
+                    </depends>
+                </field>
             </group>
         </section>
     </system>
