@@ -25,7 +25,38 @@ $beginCheckoutPayload = $beginCheckoutEvent->get();
                 googleTagManager2Pusher(event.detail, 'Hyva Checkout');
             }, {passive: true});
 
-            googleTagManager2Pusher(<?= /* @noEscape */ json_encode($beginCheckoutPayload) ?>, 'Hyva Checkout');
+            const beginCheckoutPayload = <?= /* @noEscape */ json_encode($beginCheckoutPayload) ?>;
+
+            function userDataAlreadyPushed() {
+                if (!Array.isArray(window.dataLayer)) {
+                    return false;
+                }
+                return window.dataLayer.some(function (entry) {
+                    return entry && entry.event === 'trytagging_user_data';
+                });
+            }
+
+            function pushBeginCheckout() {
+                googleTagManager2Pusher(beginCheckoutPayload, 'Hyva Checkout');
+            }
+
+            function waitForUserData(maxWaitMs) {
+                const start = Date.now();
+                const interval = setInterval(function () {
+                    if (userDataAlreadyPushed() || Date.now() - start >= maxWaitMs) {
+                        clearInterval(interval);
+                        pushBeginCheckout();
+                    }
+                }, 50);
+            }
+
+            if (document.readyState === 'loading') {
+                document.addEventListener('DOMContentLoaded', function () {
+                    waitForUserData(2000);
+                });
+            } else {
+                waitForUserData(2000);
+            }
         })();
     </script><?php if (isset($hyvaCsp) && $hyvaCsp): ?><?php $hyvaCsp->registerInlineScript() ?><?php endif; ?>
 </div>
