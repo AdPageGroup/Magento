@@ -7,6 +7,7 @@ namespace Tagging\GTM\DataLayer\Mapper;
 use Magento\Catalog\Api\Data\ProductInterface;
 use Magento\Framework\Exception\LocalizedException;
 use Magento\Framework\Exception\NoSuchEntityException;
+use Magento\Catalog\Pricing\Price\FinalPrice;
 use Magento\ConfigurableProduct\Model\Product\Type\Configurable;
 use Tagging\GTM\Api\Data\ProductTagInterface;
 use Tagging\GTM\Api\Data\TagInterface;
@@ -98,7 +99,12 @@ class ProductDataMapper
         } catch (NoSuchEntityException $noSuchEntityException) {
         }
 
-        $productData['price'] = $this->priceFormatter->format((float)$product->getFinalPrice());
+        // Use the price info final price instead of getFinalPrice(): for grouped products the
+        // parent product itself has no price (getFinalPrice() returns 0) and Magento resolves the
+        // final price to the lowest priced associated product, which is what is shown on the front-end.
+        $productData['price'] = $this->priceFormatter->format(
+            (float)$product->getPriceInfo()->getPrice(FinalPrice::PRICE_CODE)->getValue()
+        );
 
         $productData = $this->attachCategoriesData($product, $productData);
         $productData = $this->parseDataLayerMapping($product, $productData);
