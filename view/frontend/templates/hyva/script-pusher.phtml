@@ -45,7 +45,7 @@ declare(strict_types=1);
         if (eventData.marketing) {
             const expires = new Date();
             expires.setTime(expires.getTime() + 7 * 24 * 60 * 60 * 1000);
-            document.cookie = `trytagging_user_data=${btoa(JSON.stringify(eventData.marketing))};expires=${expires.toUTCString()};path=/`;
+            document.cookie = `trytagging_user_data=${btoa(String.fromCharCode(...new TextEncoder().encode(JSON.stringify(eventData.marketing))))};expires=${expires.toUTCString()};path=/`;
         }
 
         googleTagManager2Logger(message, eventData);

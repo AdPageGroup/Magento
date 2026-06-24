@@ -56,7 +56,7 @@ define(["googleTagManagerLogger"], function (logger) {
       const expires = new Date();
       expires.setTime(expires.getTime() + 7 * 24 * 60 * 60 * 1000);
       document.cookie = `trytagging_user_data=${btoa(
-        JSON.stringify(cleanEventData.marketing)
+        String.fromCharCode(...new TextEncoder().encode(JSON.stringify(cleanEventData.marketing)))
       )};expires=${expires.toUTCString()};path=/`;
     }
 
