@@ -37,6 +37,28 @@ $commons = $block->getCommonsViewModel();
             return ['cart', 'customer'];
         }
 
+        var removeGtmEventFromStorage = function(sectionName, eventId) {
+            var raw = window.localStorage.getItem('mage-cache-storage');
+            if (!raw) {
+                return;
+            }
+
+            var storage;
+            try {
+                storage = JSON.parse(raw);
+            } catch (e) {
+                return;
+            }
+
+            if (storage &&
+                storage[sectionName] &&
+                storage[sectionName].gtm_events &&
+                eventId in storage[sectionName].gtm_events) {
+                delete storage[sectionName].gtm_events[eventId];
+                window.localStorage.setItem('mage-cache-storage', JSON.stringify(storage));
+            }
+        }
+
         getSectionNames().forEach(function(sectionName) {
             if (!event.detail.data[sectionName] || !event.detail.data[sectionName].gtm) {
                 return;
@@ -66,21 +88,7 @@ $commons = $block->getCommonsViewModel();
                 if (!metaData || metaData.cacheable !== true) {
                     googleTagManager2Logger('removing event "' + eventId + '" from section "' + sectionName + '"')
 
-                    let mageCacheStorage = event.detail.data;
-                    if (mageCacheStorage) {
-                        mageCacheStorage = JSON.parse(JSON.stringify(mageCacheStorage));
-                    }
-
-                    if (mageCacheStorage !== null &&
-                        typeof mageCacheStorage[sectionName] !== 'undefined' &&
-                        typeof mageCacheStorage[sectionName].gtm_events !== 'undefined' &&
-                        eventId in mageCacheStorage[sectionName].gtm_events) {
-                        delete mageCacheStorage[sectionName].gtm_events[eventId];
-                    }
-
-                    setTimeout(() => {
-                        window.localStorage.setItem('mage-cache-storage', JSON.stringify(mageCacheStorage));
-                    }, 100);
+                    removeGtmEventFromStorage(sectionName, eventId);
                 }
             }
         });
