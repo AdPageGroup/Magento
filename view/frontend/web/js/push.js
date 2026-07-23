@@ -37,6 +37,55 @@ define(["googleTagManagerLogger"], function (logger) {
       return;
     }
 
+    // Prevent the same purchase from being pushed more than once per browser.
+    // The in-memory hash above only guards a single page load, while a purchase
+    // can be emitted by several sources (server-rendered layout event and the
+    // customerData "gtm-checkout" section) and re-rendered on every reload of
+    // the success page. Purchase events carry a stable ecommerce.transaction_id;
+    // other events do not, so this guard only applies to trytagging_purchase.
+    if (
+      cleanEventData.event === "trytagging_purchase" &&
+      cleanEventData.ecommerce &&
+      cleanEventData.ecommerce.transaction_id
+    ) {
+      const transactionId = String(cleanEventData.ecommerce.transaction_id);
+      const storageKey = "Tagging_GTM_PURCHASED_TRANSACTIONS";
+      let purchasedTransactions = [];
+      try {
+        purchasedTransactions = JSON.parse(
+          window.localStorage.getItem(storageKey) || "[]"
+        );
+        if (!Array.isArray(purchasedTransactions)) {
+          purchasedTransactions = [];
+        }
+      } catch (error) {
+        purchasedTransactions = [];
+      }
+
+      if (purchasedTransactions.indexOf(transactionId) !== -1) {
+        logger(
+          "Warning: Purchase already tracked for transaction " + transactionId,
+          eventData
+        );
+        return;
+      }
+
+      purchasedTransactions.push(transactionId);
+      // Keep the list bounded so localStorage does not grow indefinitely.
+      if (purchasedTransactions.length > 50) {
+        purchasedTransactions = purchasedTransactions.slice(-50);
+      }
+      try {
+        window.localStorage.setItem(
+          storageKey,
+          JSON.stringify(purchasedTransactions)
+        );
+      } catch (error) {
+        // localStorage unavailable (private mode / disabled) — fall back to the
+        // in-memory hash guard only.
+      }
+    }
+
     if (!message) {
       message = "push (unknown) [unknown]";
     }
