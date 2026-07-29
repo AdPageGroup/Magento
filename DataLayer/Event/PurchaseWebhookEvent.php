@@ -97,6 +97,11 @@ class PurchaseWebhookEvent
                 'value' => $this->priceFormatter->format((float)$order->getGrandTotal()),
                 'tax' => $this->priceFormatter->format((float)$order->getTaxAmount()),
                 'shipping' => $this->priceFormatter->format((float)$order->getShippingInclTax()),
+                'shipping_excl_tax' => $this->priceFormatter->format((float)$order->getShippingAmount()),
+                'shipping_tax' => $this->priceFormatter->format((float)$order->getShippingTaxAmount()),
+                'shipping_discount' => $this->priceFormatter->format((float)$order->getShippingDiscountAmount()),
+                'shipping_method' => $order->getShippingDescription() ?? '',
+                'shipping_method_code' => (string)$order->getData('shipping_method'),
                 'coupon' => $order->getCouponCode(),
                 'items' => $this->orderItems->setOrder($order)->get()
             ]
