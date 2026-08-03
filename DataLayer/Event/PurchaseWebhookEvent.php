@@ -102,6 +102,24 @@ class PurchaseWebhookEvent
             ]
         ];
 
+        // Additional shipping, base currency and payment data used by AdPage to
+        // calculate the actual profit (COGS, carrier rate, payment fees) per order.
+        // Purely additive: existing keys keep their name, meaning and value.
+        try {
+            $data['ecommerce'] += [
+                'shipping_method' => $order->getShippingDescription() ?? '',
+                'shipping_method_code' => $order->getShippingMethod() ?? '',
+                'shipping_excl_tax' => $this->priceFormatter->format((float)$order->getShippingAmount()),
+                'base_shipping_excl_tax' => $this->priceFormatter->format((float)$order->getBaseShippingAmount()),
+                'base_value' => $this->priceFormatter->format((float)$order->getBaseGrandTotal()),
+                'base_tax' => $this->priceFormatter->format((float)$order->getBaseTaxAmount()),
+                'base_currency' => $order->getBaseCurrencyCode() ?? '',
+                'payment_type' => $order->getPayment() ? (string)$order->getPayment()->getMethod() : ''
+            ];
+        } catch (\Exception $e) {
+            $this->debugger->debug('PurchaseWebhookEvent::purchase(): could not resolve shipping/base data: ' . $e->getMessage());
+        }
+
         try {
             $data['user_data'] = [
                 "customer_id" => $order->getCustomerId() ?? '',
