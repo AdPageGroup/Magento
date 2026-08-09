@@ -33,6 +33,11 @@
 
         <referenceContainer name="after.body.start">
             <block
+                    name="Tagging_GTM.debug-action"
+                    template="Tagging_GTM::luma/debug-action.phtml"
+                    ifconfig="GTM/settings/enabled"
+            />
+            <block
                     name="Tagging_GTM.iframe"
                     template="Tagging_GTM::iframe.phtml"
                     ifconfig="GTM/settings/enabled"

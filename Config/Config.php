@@ -236,6 +236,79 @@ class Config implements ArgumentInterface
     }
 
     /**
+     * Check if page-specific checking is enabled for purchase event
+     *
+     * @return bool
+     */
+    public function isPurchaseEventPageCheckEnabled(): bool
+    {
+        return (bool)$this->getModuleConfigValueAdvanced('purchase_event_page_check_enabled', true);
+    }
+
+    /**
+     * Get allowed checkout actions for purchase event
+     *
+     * @return array
+     */
+    public function getPurchaseEventAllowedCheckoutActions(): array
+    {
+        // Only return actions if page check is enabled
+        if (!$this->isPurchaseEventPageCheckEnabled()) {
+            return [];
+        }
+
+        $configValue = $this->getModuleConfigValueAdvanced('purchase_event_allowed_checkout_actions', null);
+        
+        // If null or empty and page check is enabled, return all available actions as default
+        if ($configValue === null || $configValue === '' || $configValue === false) {
+            return $this->getAllAvailableCheckoutActions();
+        }
+        
+        // Multiselect values in Magento can be stored in different formats:
+        // 1. As an array (when retrieved via ScopeConfigInterface in some cases)
+        // 2. As a comma-separated string (most common)
+        // 3. As a JSON string (less common)
+        
+        if (is_array($configValue)) {
+            $actions = array_filter(array_map('trim', $configValue));
+            // If array is empty, return all available actions
+            return empty($actions) ? $this->getAllAvailableCheckoutActions() : $actions;
+        }
+        
+        if (is_string($configValue)) {
+            // Try JSON decode first (in case it's stored as JSON)
+            $decoded = json_decode($configValue, true);
+            if (json_last_error() === JSON_ERROR_NONE && is_array($decoded)) {
+                $actions = array_filter(array_map('trim', $decoded));
+                return empty($actions) ? $this->getAllAvailableCheckoutActions() : $actions;
+            }
+            
+            // Otherwise treat as comma-separated string
+            $actions = array_filter(array_map('trim', explode(',', $configValue)));
+            return empty($actions) ? $this->getAllAvailableCheckoutActions() : $actions;
+        }
+        
+        return $this->getAllAvailableCheckoutActions();
+    }
+
+    /**
+     * Get all available checkout actions
+     *
+     * @return array
+     */
+    private function getAllAvailableCheckoutActions(): array
+    {
+        return [
+            'checkout_index_index',
+            'checkout_onepage_success',
+            'checkout_cart_index',
+            'checkout_onepage_index',
+            'checkout_multishipping_index',
+            'checkout_multishipping_success',
+        ];
+    }
+
+    /**
      * @return bool
      */
     private function isDeveloperMode(): bool
