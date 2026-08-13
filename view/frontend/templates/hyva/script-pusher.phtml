@@ -11,6 +11,73 @@ declare(strict_types=1);
  */
 ?>
 <script>
+    // Assigned on window rather than declared, so a second render of this
+    // template cannot break the page on a duplicate declaration
+    window.Tagging_GTM_PURCHASE_EVENT = 'trytagging_purchase';
+    window.Tagging_GTM_PUSHED_TRANSACTIONS_KEY = 'tagging_gtm_pushed_transactions';
+    window.Tagging_GTM_PUSHED_TRANSACTIONS_MAX = 50;
+
+    /**
+     * Serialize with the object keys sorted, so that two events holding the same
+     * values hash to the same string even when the keys were assembled in a
+     * different order server-side.
+     */
+    function googleTagManager2StableStringify(value) {
+        if (Array.isArray(value)) {
+            return '[' + value.map(googleTagManager2StableStringify).join(',') + ']';
+        }
+
+        if (value && typeof value === 'object') {
+            return '{' + Object.keys(value).sort().map(function (key) {
+                return JSON.stringify(key) + ':' + googleTagManager2StableStringify(value[key]);
+            }).join(',') + '}';
+        }
+
+        const serialized = JSON.stringify(value);
+
+        return typeof serialized === 'undefined' ? 'null' : serialized;
+    }
+
+    function googleTagManager2GetPushedTransactions() {
+        try {
+            const stored = JSON.parse(window.localStorage.getItem(window.Tagging_GTM_PUSHED_TRANSACTIONS_KEY) || '[]');
+
+            return Array.isArray(stored) ? stored : [];
+        } catch (error) {
+            // No storage available, fall back to the in-memory guard only
+            return [];
+        }
+    }
+
+    function googleTagManager2RememberTransaction(transactionId) {
+        try {
+            const transactions = googleTagManager2GetPushedTransactions();
+            transactions.push(transactionId);
+
+            window.localStorage.setItem(
+                window.Tagging_GTM_PUSHED_TRANSACTIONS_KEY,
+                JSON.stringify(transactions.slice(-window.Tagging_GTM_PUSHED_TRANSACTIONS_MAX))
+            );
+        } catch (error) {
+            // No storage available, fall back to the in-memory guard only
+        }
+    }
+
+    /**
+     * The transaction a purchase event belongs to, or null for any other event.
+     * The in-memory guard is reset on every page load, so purchases are also
+     * deduplicated on their transaction to survive a reload of the success page.
+     */
+    function googleTagManager2GetTransactionId(eventData) {
+        if (eventData.event !== window.Tagging_GTM_PURCHASE_EVENT || !eventData.ecommerce) {
+            return null;
+        }
+
+        const transactionId = eventData.ecommerce.transaction_id;
+
+        return transactionId ? String(transactionId) : null;
+    }
+
     function googleTagManager2Pusher(eventData, message) {
         window.Tagging_GTM_PAST_EVENTS = window.Tagging_GTM_PAST_EVENTS || [];
 
@@ -21,7 +88,14 @@ declare(strict_types=1);
             delete copyEventData.meta;
         }
 
-        const eventHash = btoa(encodeURIComponent(JSON.stringify(copyEventData)));
+        // Prevent the same purchase from being triggered twice, across page loads
+        const transactionId = googleTagManager2GetTransactionId(copyEventData);
+        if (transactionId && googleTagManager2GetPushedTransactions().includes(transactionId)) {
+            googleTagManager2Logger('Warning: Purchase already triggered for transaction "' + transactionId + '"', eventData);
+            return;
+        }
+
+        const eventHash = btoa(encodeURIComponent(googleTagManager2StableStringify(copyEventData)));
         if (window.Tagging_GTM_PAST_EVENTS.includes(eventHash)) {
             googleTagManager2Logger('Warning: Event already triggered', eventData);
             return;
@@ -70,5 +144,9 @@ declare(strict_types=1);
 
         window.dataLayer.push(eventData);
         window.Tagging_GTM_PAST_EVENTS.push(eventHash);
+
+        if (transactionId) {
+            googleTagManager2RememberTransaction(transactionId);
+        }
     }
 </script><?php if (isset($hyvaCsp) && $hyvaCsp): ?><?php $hyvaCsp->registerInlineScript() ?><?php endif; ?>

@@ -9,6 +9,7 @@ use Magento\Framework\Serialize\Serializer\Json;
 use Tagging\GTM\Api\NewCustomerResolverInterface;
 use Tagging\GTM\DataLayer\Tag\Order\OrderItems;
 use Magento\Sales\Api\Data\OrderInterface;
+use Tagging\GTM\Util\EventIdGenerator;
 use Tagging\GTM\Util\PriceFormatter;
 use Tagging\GTM\Config\Config;
 use Psr\Log\LoggerInterface;
@@ -24,6 +25,7 @@ class PurchaseWebhookEvent
     private LoggerInterface $logger;
     private Debugger $debugger;
     private NewCustomerResolverInterface $newCustomerResolver;
+    private EventIdGenerator $eventIdGenerator;
 
     public function __construct(
         Json            $json,
@@ -33,7 +35,8 @@ class PurchaseWebhookEvent
         PriceFormatter  $priceFormatter,
         LoggerInterface $logger,
         Debugger $debugger,
-        NewCustomerResolverInterface $newCustomerResolver
+        NewCustomerResolverInterface $newCustomerResolver,
+        EventIdGenerator $eventIdGenerator
     ) {
         $this->json = $json;
         $this->clientFactory = $clientFactory;
@@ -43,6 +46,7 @@ class PurchaseWebhookEvent
         $this->logger = $logger;
         $this->debugger = $debugger;
         $this->newCustomerResolver = $newCustomerResolver;
+        $this->eventIdGenerator = $eventIdGenerator;
     }
 
     public function purchase(OrderInterface $order)
@@ -87,6 +91,8 @@ class PurchaseWebhookEvent
 
         $data = [
             'event' => 'trytagging_purchase',
+            // Shared with the browser event so Meta can deduplicate browser and CAPI
+            'event_id' => $this->eventIdGenerator->forOrder($order),
             'marketing' => $marketingData,
             'store_domain' => $this->config->getStoreDomain(),
             'plugin_version' => $this->config->getVersion(),

@@ -9,6 +9,7 @@ use Tagging\GTM\Api\Data\EventInterface;
 use Tagging\GTM\Api\NewCustomerResolverInterface;
 use Tagging\GTM\Config\Config;
 use Tagging\GTM\DataLayer\Tag\Order\OrderItems;
+use Tagging\GTM\Util\EventIdGenerator;
 use Tagging\GTM\Util\PriceFormatter;
 
 class Purchase implements EventInterface
@@ -18,17 +19,20 @@ class Purchase implements EventInterface
     private Config $config;
     private PriceFormatter $priceFormatter;
     private NewCustomerResolverInterface $newCustomerResolver;
+    private EventIdGenerator $eventIdGenerator;
 
     public function __construct(
         OrderItems $orderItems,
         Config $config,
         PriceFormatter $priceFormatter,
-        NewCustomerResolverInterface $newCustomerResolver
+        NewCustomerResolverInterface $newCustomerResolver,
+        EventIdGenerator $eventIdGenerator
     ) {
         $this->orderItems = $orderItems;
         $this->config = $config;
         $this->priceFormatter = $priceFormatter;
         $this->newCustomerResolver = $newCustomerResolver;
+        $this->eventIdGenerator = $eventIdGenerator;
     }
 
     /**
@@ -39,6 +43,7 @@ class Purchase implements EventInterface
         $order = $this->order;
         return [
             'event' => 'trytagging_purchase',
+            'event_id' => $this->eventIdGenerator->forOrder($order),
             'ecommerce' => [
                 'transaction_id' => $order->getIncrementId(),
                 'affiliation' => $this->config->getStoreName(),
