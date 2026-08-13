@@ -1,4 +1,78 @@
 define(["googleTagManagerLogger"], function (logger) {
+  const PURCHASE_EVENT = "trytagging_purchase";
+  const PUSHED_TRANSACTIONS_KEY = "tagging_gtm_pushed_transactions";
+  const PUSHED_TRANSACTIONS_MAX = 50;
+
+  /**
+   * Serialize with the object keys sorted, so that two events holding the same
+   * values hash to the same string even when the keys were assembled in a
+   * different order server-side.
+   */
+  const stableStringify = function (value) {
+    if (Array.isArray(value)) {
+      return "[" + value.map(stableStringify).join(",") + "]";
+    }
+
+    if (value && typeof value === "object") {
+      return (
+        "{" +
+        Object.keys(value)
+          .sort()
+          .map(function (key) {
+            return JSON.stringify(key) + ":" + stableStringify(value[key]);
+          })
+          .join(",") +
+        "}"
+      );
+    }
+
+    const serialized = JSON.stringify(value);
+
+    return typeof serialized === "undefined" ? "null" : serialized;
+  };
+
+  const getPushedTransactions = function () {
+    try {
+      const stored = JSON.parse(
+        window.localStorage.getItem(PUSHED_TRANSACTIONS_KEY) || "[]"
+      );
+
+      return Array.isArray(stored) ? stored : [];
+    } catch (error) {
+      // No storage available, fall back to the in-memory guard only
+      return [];
+    }
+  };
+
+  const rememberTransaction = function (transactionId) {
+    try {
+      const transactions = getPushedTransactions();
+      transactions.push(transactionId);
+
+      window.localStorage.setItem(
+        PUSHED_TRANSACTIONS_KEY,
+        JSON.stringify(transactions.slice(-PUSHED_TRANSACTIONS_MAX))
+      );
+    } catch (error) {
+      // No storage available, fall back to the in-memory guard only
+    }
+  };
+
+  /**
+   * The transaction a purchase event belongs to, or null for any other event.
+   * The in-memory guard is reset on every page load, so purchases are also
+   * deduplicated on their transaction to survive a reload of the success page.
+   */
+  const getTransactionId = function (eventData) {
+    if (eventData.event !== PURCHASE_EVENT || !eventData.ecommerce) {
+      return null;
+    }
+
+    const transactionId = eventData.ecommerce.transaction_id;
+
+    return transactionId ? String(transactionId) : null;
+  };
+
   return function (eventData, message) {
     window.Tagging_GTM_PAST_EVENTS = window.Tagging_GTM_PAST_EVENTS || [];
 
@@ -30,8 +104,20 @@ define(["googleTagManagerLogger"], function (logger) {
       return;
     }
 
+    // Prevent the same purchase from being triggered twice, across page loads
+    const transactionId = getTransactionId(cleanEventData);
+    if (transactionId && getPushedTransactions().includes(transactionId)) {
+      logger(
+        'Warning: Purchase already triggered for transaction "' +
+          transactionId +
+          '"',
+        eventData
+      );
+      return;
+    }
+
     // Prevent the same event from being triggered twice, when containing the same data
-    const eventHash = btoa(encodeURIComponent(JSON.stringify(cleanEventData)));
+    const eventHash = btoa(encodeURIComponent(stableStringify(cleanEventData)));
     if (window.Tagging_GTM_PAST_EVENTS.includes(eventHash)) {
       logger("Warning: Event already triggered", eventData);
       return;
@@ -80,5 +166,9 @@ define(["googleTagManagerLogger"], function (logger) {
 
     window.dataLayer.push(cleanEventData);
     window.Tagging_GTM_PAST_EVENTS.push(eventHash);
+
+    if (transactionId) {
+      rememberTransaction(transactionId);
+    }
   };
 });
