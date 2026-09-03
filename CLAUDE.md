@@ -76,3 +76,26 @@ The module includes Hyva theme compatibility via:
 - Unit tests: `Test/Unit/`
 - Integration tests: `Test/Integration/`
 - Functional tests: `Test/Functional/`
+
+## Communication and writing style (for agents)
+
+Applies to everything an agent produces here: commit messages, PR titles and descriptions,
+code comments, release notes and any text that ends up with support or a customer.
+
+- No em-dash (`—`) and no en-dash (`–`). Use a period, a comma, a colon or a plain hyphen.
+- Short and factual. Say what changes and why. No three-item list where two items suffice.
+- No headings or bold labels in a short PR description.
+
+## Release discipline
+
+Customers and agencies install this module with `composer require tagginggroup/gtm`, so a
+fix is only finished once there is a tagged release.
+
+- Never leave a customer or agency running `tagginggroup/gtm:dev-master` to test a fix. If
+  that is unavoidable, name a date for the tagged release in the same message.
+- Bump `version` in `composer.json` and tag the release as soon as the fix is validated,
+  then tell support the version number and which shops need to update.
+- Purchase events are deduplication sensitive. Changes to `DataLayer/Event/Purchase.php`,
+  `DataLayer/Event/PurchaseWebhookEvent.php`, `DataLayer/Tag/Order/EventId.php` or the
+  order observers must be tested for double firing per `transaction_id` and `event_id`, not
+  just for "the event arrives".
