@@ -10,6 +10,16 @@
         </arguments>
     </type>
 
+    <!--
+        The customer session is only needed on the storefront. A proxy keeps it from being instantiated
+        in contexts without a session, such as the cron job that retries failed webhooks.
+    -->
+    <type name="Tagging\GTM\Util\PriceVisibility">
+        <arguments>
+            <argument name="customerSession" xsi:type="object">Magento\Customer\Model\Session\Proxy</argument>
+        </arguments>
+    </type>
+
     <type name="Tagging\GTM\DataLayer\Mapper\ProductDataMapper">
         <arguments>
             <argument name="dataLayerMapping" xsi:type="array">

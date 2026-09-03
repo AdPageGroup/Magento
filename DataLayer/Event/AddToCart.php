@@ -56,16 +56,25 @@ class AddToCart implements EventInterface
         
         $itemData = $this->productDataMapper->mapByProduct($product);
         $itemData['quantity'] = $qty;
-        $value = $itemData['price'] * $qty;
 
-        return [
+        // No item price means the price is hidden for this visitor, so no value is reported either.
+        $price = $itemData['price'] ?? null;
+        $value = $price === null ? null : $this->priceFormatter->format((float)$price * $qty);
+
+        $eventData = [
             'event' => 'trytagging_add_to_cart',
             'ecommerce' => [
                 'currency' => $this->currencyCode->get(),
-                'value' => $this->priceFormatter->format((float)$value),
+                'value' => $value,
                 'items' => [$itemData]
             ]
         ];
+
+        if ($value === null) {
+            unset($eventData['ecommerce']['value']);
+        }
+
+        return $eventData;
     }
 
     /**
