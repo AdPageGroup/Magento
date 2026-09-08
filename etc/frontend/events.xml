@@ -4,6 +4,10 @@
         <observer name="Tagging_GTM::addAdditionalLayoutHandles" instance="Tagging\GTM\Observer\AddAdditionalLayoutHandles" />
     </event>
 
+    <event name="catalog_block_product_list_collection">
+        <observer name="Tagging_GTM::collectProductListProducts" instance="Tagging\GTM\Observer\CollectProductListProducts" />
+    </event>
+
     <event name="sales_quote_remove_item">
         <observer name="Tagging_GTM::triggerRemoveFromCartDataLayerEvent" instance="Tagging\GTM\Observer\TriggerRemoveFromCartDataLayerEvent" />
     </event>
