@@ -12,10 +12,6 @@
         <plugin name="Tagging_GTM::addAdditionalDataToCartSection" type="Tagging\GTM\Plugin\AddDataToCartSection"/>
     </type>
 
-    <type name="Magento\Catalog\Block\Product\ListProduct">
-        <plugin name="Tagging_GTM::getProductsFromCategoryBlockPlugin" type="Tagging\GTM\Plugin\GetProductsFromCategoryBlockPlugin"/>
-    </type>
-
     <type name="Magento\CatalogSearch\Controller\Result\Index">
         <plugin name="Tagging_GTM::TriggerViewSearchResultDataLayerEvent" type="Tagging\GTM\Plugin\TriggerViewSearchResultDataLayerEvent"/>
     </type>
