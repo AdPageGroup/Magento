@@ -8,5 +8,12 @@
                 <debug>0</debug>
             </settings>
         </googletagmanager2>
+        <GTM>
+            <price_visibility>
+                <enabled>0</enabled>
+                <customer_groups>0</customer_groups>
+                <mode>remove</mode>
+            </price_visibility>
+        </GTM>
     </default>
 </config>

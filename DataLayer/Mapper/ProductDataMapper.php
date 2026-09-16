@@ -14,6 +14,7 @@ use Tagging\GTM\Api\Data\TagInterface;
 use Tagging\GTM\Config\Config;
 use Tagging\GTM\Util\Attribute\GetAttributeValue;
 use Tagging\GTM\Util\PriceFormatter;
+use Tagging\GTM\Util\PriceVisibility;
 use Tagging\GTM\Util\CategoryProvider;
 use Magento\Catalog\Api\ProductRepositoryInterface;
 
@@ -23,6 +24,7 @@ class ProductDataMapper
     private GetAttributeValue $getAttributeValue;
     private CategoryProvider $categoryProvider;
     private PriceFormatter $priceFormatter;
+    private PriceVisibility $priceVisibility;
     private Configurable $configurableType;
     private ProductRepositoryInterface $productRepository;
 
@@ -35,6 +37,7 @@ class ProductDataMapper
      * @param GetAttributeValue $getAttributeValue
      * @param CategoryProvider $categoryProvider
      * @param PriceFormatter $priceFormatter
+     * @param PriceVisibility $priceVisibility
      * @param array $dataLayerMapping
      */
     public function __construct(
@@ -44,12 +47,14 @@ class ProductDataMapper
         PriceFormatter $priceFormatter,
         Configurable $configurableType,
         ProductRepositoryInterface $productRepository,
+        PriceVisibility $priceVisibility,
         array $dataLayerMapping = []
     ) {
         $this->config = $config;
         $this->getAttributeValue = $getAttributeValue;
         $this->categoryProvider = $categoryProvider;
         $this->priceFormatter = $priceFormatter;
+        $this->priceVisibility = $priceVisibility;
         $this->configurableType = $configurableType;
         $this->productRepository = $productRepository;
         $this->dataLayerMapping = $dataLayerMapping;
@@ -102,9 +107,15 @@ class ProductDataMapper
         // Use the price info final price instead of getFinalPrice(): for grouped products the
         // parent product itself has no price (getFinalPrice() returns 0) and Magento resolves the
         // final price to the lowest priced associated product, which is what is shown on the front-end.
-        $productData['price'] = $this->priceFormatter->format(
-            (float)$product->getPriceInfo()->getPrice(FinalPrice::PRICE_CODE)->getValue()
+        $price = $this->priceVisibility->filter(
+            $this->priceFormatter->format(
+                (float)$product->getPriceInfo()->getPrice(FinalPrice::PRICE_CODE)->getValue()
+            )
         );
+
+        if ($price !== null) {
+            $productData['price'] = $price;
+        }
 
         $productData = $this->attachCategoriesData($product, $productData);
         $productData = $this->parseDataLayerMapping($product, $productData);

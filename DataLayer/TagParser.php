@@ -43,7 +43,17 @@ class TagParser
         }
 
         if (is_object($tagValue)) {
-            $data[$tagName] = $this->getValueFromFromTagValueObject($tagValue);
+            $tagValue = $this->getValueFromFromTagValueObject($tagValue);
+
+            // A tag that resolves to null has nothing to say, so its key is left out of the
+            // dataLayer entirely instead of being pushed as null. Tags that hide their value -
+            // such as the price tags on a B2B store - rely on this.
+            if (is_null($tagValue)) {
+                unset($data[$tagName]);
+                return $data;
+            }
+
+            $data[$tagName] = $tagValue;
             return $data;
         }
 

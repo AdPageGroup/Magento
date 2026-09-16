@@ -13,6 +13,7 @@ use Magento\Store\Model\ScopeInterface;
 use Magento\Store\Model\StoreManagerInterface;
 use Magento\Framework\UrlInterface;
 use Tagging\GTM\DataLayer\Tag\Version;
+use Tagging\GTM\Model\Config\Source\HidePriceMode;
 
 class Config implements ArgumentInterface
 {
@@ -156,6 +157,59 @@ class Config implements ArgumentInterface
     }
 
     /**
+     * Check whether prices should be hidden in the dataLayer for specific customer groups
+     *
+     * B2B stores that only reveal prices to logged in (or approved) customers use this to keep those
+     * prices out of the dataLayer as well.
+     *
+     * @return bool
+     */
+    public function isHidePricesEnabled(): bool
+    {
+        return (bool)$this->getModuleConfigValuePriceVisibility('enabled', false);
+    }
+
+    /**
+     * The customer group ids that are not allowed to see prices in the dataLayer
+     *
+     * @return int[]
+     */
+    public function getHidePricesCustomerGroups(): array
+    {
+        $customerGroups = $this->getRawConfigValue('GTM/price_visibility/customer_groups');
+        if (!is_string($customerGroups) || $customerGroups === '') {
+            return [];
+        }
+
+        $customerGroupIds = [];
+        foreach (explode(',', $customerGroups) as $customerGroupId) {
+            $customerGroupId = trim($customerGroupId);
+            if ($customerGroupId === '') {
+                continue;
+            }
+
+            $customerGroupIds[] = (int)$customerGroupId;
+        }
+
+        return $customerGroupIds;
+    }
+
+    /**
+     * How a hidden price should be represented in the dataLayer
+     *
+     * @return string
+     */
+    public function getHidePricesMode(): string
+    {
+        $mode = (string)$this->getModuleConfigValuePriceVisibility('mode', HidePriceMode::MODE_REMOVE);
+        if ($mode !== HidePriceMode::MODE_ZERO) {
+            return HidePriceMode::MODE_REMOVE;
+        }
+
+        return $mode;
+    }
+
+    /**
      * Return a configuration value
      *
      * @param string $key
@@ -166,6 +220,19 @@ class Config implements ArgumentInterface
     public function getModuleConfigValue(string $key, $defaultValue = null)
     {
         return $this->getConfigValue('GTM/settings/' . $key, $defaultValue);
+    }
+
+    /**
+     * Return a price visibility configuration value
+     *
+     * @param string $key
+     * @param null $defaultValue
+     *
+     * @return mixed|null
+     */
+    public function getModuleConfigValuePriceVisibility(string $key, $defaultValue = null)
+    {
+        return $this->getConfigValue('GTM/price_visibility/' . $key, $defaultValue);
     }
 
     public function getModuleConfigValueAdvanced(string $key, $defaultValue = null)
@@ -198,6 +265,26 @@ class Config implements ArgumentInterface
         }
 
         return $value;
+    }
+
+    /**
+     * Return a configuration value without treating "0" and other falsy values as absent
+     *
+     * @param string $key
+     *
+     * @return mixed|null
+     */
+    public function getRawConfigValue(string $key)
+    {
+        try {
+            return $this->scopeConfig->getValue(
+                $key,
+                ScopeInterface::SCOPE_STORE,
+                $this->storeManager->getStore()
+            );
+        } catch (NoSuchEntityException $e) {
+            return null;
+        }
     }
 
     public function getVersion(): string

@@ -35,7 +35,7 @@ class BeginCheckout implements EventInterface
 
     public function get(): array
     {
-        return [
+        $eventData = [
             'event' => 'trytagging_begin_checkout',
             'ecommerce' => [
                 'currency' => $this->currencyCode->get(),
@@ -44,5 +44,11 @@ class BeginCheckout implements EventInterface
                 'items' => $this->cartItems->get()
             ]
         ];
+
+        if ($eventData['ecommerce']['value'] === null) {
+            unset($eventData['ecommerce']['value']);
+        }
+
+        return $eventData;
     }
 }
