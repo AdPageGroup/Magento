@@ -21,6 +21,14 @@ The extension itself pushes a purchase only once per transaction. The transactio
 kept in `localStorage` under `tagging_gtm_pushed_transactions`, so a reload of the success page does not
 retrigger the event.
 
+# Session event deduplication
+Events that are queued in the session (add to cart, add payment info, login, ...) get a unique `meta.event_key`
+and a `meta.created_at` timestamp when they are created. The keys of pushed events are kept in `localStorage`
+under `tagging_gtm_pushed_event_keys`, so an event that is delivered again by a later section load, or replayed
+from the section data that Hyvä caches, is only pushed once. As a fallback for when that storage is not
+available, events that were queued more than 2 hours ago are skipped. Cacheable events such as `view_cart` are
+not deduplicated.
+
 # Tip: Browser extension
 Use the [DataLayer
 Checker](https://chrome.google.com/webstore/detail/datalayer-checker/ffljdddodmkedhkcjhpmdajhjdbkogke) for Chrome to
