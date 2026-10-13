@@ -88,6 +88,9 @@ $commons = $block->getCommonsViewModel();
                 if (!metaData || metaData.cacheable !== true) {
                     googleTagManager2Logger('removing event "' + eventId + '" from section "' + sectionName + '"')
 
+                    // Hyvä stores the dispatched data in localStorage only after this listener ran,
+                    // so drop the event from that same object as well
+                    delete gtmEvents[eventId];
                     removeGtmEventFromStorage(sectionName, eventId);
                 }
             }
