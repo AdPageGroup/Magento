@@ -7,13 +7,11 @@ namespace Tagging\GTM\Test\Integration\Page;
 use Magento\Catalog\Api\CategoryRepositoryInterface;
 use Magento\Catalog\Api\Data\CategoryInterface;
 use Magento\Catalog\Api\ProductRepositoryInterface;
-use Magento\Catalog\Block\Product\ListProduct;
 use Magento\Framework\Registry;
 use Magento\Framework\View\LayoutInterface;
 use Tagging\GTM\Test\Integration\FixtureTrait\CreateCategory;
 use Tagging\GTM\Test\Integration\FixtureTrait\CreateProduct;
 use Tagging\GTM\Test\Integration\PageTestCase;
-use Tagging\GTM\Util\GetCurrentCategoryProducts;
 use Yireo\IntegrationTestHelper\Test\Integration\Traits\Layout\AssertHandleInLayout;
 
 /**
@@ -51,34 +49,27 @@ class CategoryPageTest extends PageTestCase
         $this->assertStringContainsString($category->getName(), $body);
         $this->assertStringContainsString('"trytagging_view_item_list"', $body);
 
-        $productListBlock = $this->layout->getBlock('category.products.list');
-        $productListBlock->setCollection($products);
-        $this->assertInstanceOf(ListProduct::class, $productListBlock);
-        $this->assertTrue($productListBlock->getLoadedProductCollection()->count() > 0);
-
         $block = $this->layout->getBlock('Tagging_GTM.data-layer');
         $this->assertNotEmpty($block);
 
-        $this->assertDataLayerEquals($category->getName(), 'category_name');
-        $this->assertDataLayerEquals($category->getId(), 'category_id');
-        $this->assertDataLayerEquals(count($productListBlock->getLoadedProductCollection()), 'category_size');
-        $this->assertDataLayerEquals('category', 'page_type');
+        // The category products are read from the listing while the page renders, so assert
+        // against the dataLayer as it was rendered instead of rebuilding it after the request
+        $pushes = $this->getDataLayerPushesFromBody($body);
 
-        $event = $this->getEventFromDataLayerEvents('view_item_list_event', 'trytagging_view_item_list');
+        $pageData = $this->findDataLayerPush($pushes, function (array $push) {
+            return ($push['page_type'] ?? null) === 'category';
+        });
+        $this->assertEquals($category->getName(), $pageData['category_name']);
+        $this->assertEquals($category->getId(), $pageData['category_id']);
+
+        $event = $this->findDataLayerPush($pushes, function (array $push) {
+            return ($push['event'] ?? null) === 'trytagging_view_item_list';
+        });
         $this->assertArrayHasKey('ecommerce', $event);
         $this->assertArrayHasKey('items', $event['ecommerce']);
+        $this->assertCount(3, $event['ecommerce']['items'], var_export($event, true));
+        $this->assertEquals(count($event['ecommerce']['items']), $pageData['category_size']);
 
-        $products = $this->getProductsByCategory($category);
-        if (!count($products) > 0) {
-            $this->markTestIncomplete('Category fixture with ID "' . $category->getId() . '" does not have any products');
-        }
-
-        $products = $this->getProductsByCurrentCategory();
-        if (!count($products) > 0) {
-            $this->markTestIncomplete('Did not detect any products on category page with ID "' . $category->getId() . '"');
-        }
-
-        $this->assertNotEmpty($event['ecommerce']['items'], var_export($event, true));
         foreach ($event['ecommerce']['items'] as $productData) {
             $this->assertNotEmpty($productData['item_id']);
             $this->assertNotEmpty($productData['item_sku']);
@@ -86,14 +77,42 @@ class CategoryPageTest extends PageTestCase
         }
     }
 
-    private function getProductsByCategory(CategoryInterface $category): array
+    /**
+     * Every dataLayer push rendered in the page, as written by the Luma (`pusher({...}, 'push (...')`)
+     * and Hyvä (`googleTagManager2Pusher({...}, 'push (...')`) data-layer templates
+     *
+     * @param string $body
+     * @return array[]
+     */
+    private function getDataLayerPushesFromBody(string $body): array
     {
-        return $category->getProductCollection()->toArray();
+        preg_match_all("/[pP]usher\((\{.*?\}), 'push \(/s", $body, $matches);
+
+        $pushes = [];
+        foreach ($matches[1] as $json) {
+            $push = json_decode($json, true);
+            if (is_array($push)) {
+                $pushes[] = $push;
+            }
+        }
+
+        $this->assertNotEmpty($pushes, 'No dataLayer pushes found in the page');
+        return $pushes;
     }
 
-    private function getProductsByCurrentCategory(): array
+    /**
+     * @param array[] $pushes
+     * @param callable $matches
+     * @return array
+     */
+    private function findDataLayerPush(array $pushes, callable $matches): array
     {
-        $getCurrentCategoryProducts = $this->objectManager->get(GetCurrentCategoryProducts::class);
-        return $getCurrentCategoryProducts->getProducts();
+        foreach ($pushes as $push) {
+            if ($matches($push)) {
+                return $push;
+            }
+        }
+
+        $this->fail('No matching dataLayer push in the page: ' . var_export($pushes, true));
     }
 }
