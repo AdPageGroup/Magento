@@ -82,6 +82,15 @@ $commons = $block->getCommonsViewModel();
             for (const [eventId, eventData] of Object.entries(gtmEvents)) {
                 googleTagManager2Logger('found event in section "' + sectionName + '"', eventData);
 
+                // The cart page renders its own view_cart, the cached section copy would only
+                // add a stale or extra view_cart on every cart reload (ported from upstream #314)
+                if (sectionName === 'cart'
+                    && eventData.event === 'trytagging_view_cart'
+                    && window.location.pathname.includes('/checkout/cart/')) {
+                    googleTagManager2Logger('skipping customerData view_cart on cart page', eventData);
+                    continue;
+                }
+
                 const metaData = eventData.meta;
                 googleTagManager2Pusher(eventData, 'push (customerData "' + sectionName + '"  event "' + eventId + '")');
 
