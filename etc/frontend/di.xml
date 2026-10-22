@@ -4,6 +4,10 @@
         <plugin name="Tagging_GTM::addProductDetails" type="Tagging\GTM\Plugin\AddProductDetails"/>
     </type>
 
+    <type name="Magento\Catalog\Block\Product\ListProduct">
+        <plugin name="Tagging_GTM::markProductListRendered" type="Tagging\GTM\Plugin\MarkProductListRendered"/>
+    </type>
+
     <type name="Magento\Customer\CustomerData\Customer">
         <plugin name="Tagging_GTM::addDataToCustomerSection" type="Tagging\GTM\Plugin\AddDataToCustomerSection"/>
     </type>
