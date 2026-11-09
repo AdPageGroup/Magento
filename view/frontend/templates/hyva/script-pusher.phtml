@@ -81,12 +81,23 @@ declare(strict_types=1);
     function googleTagManager2Pusher(eventData, message) {
         window.Tagging_GTM_PAST_EVENTS = window.Tagging_GTM_PAST_EVENTS || [];
 
+        // Never push the caller's object itself: GTM stamps gtm.uniqueEventId on every pushed
+        // object, and customer section events are the very objects Hyvä writes to localStorage
+        // after private-content-loaded, so a cached event would be replayed on every page load
         const copyEventData = Object.assign({}, eventData);
         let metaData = {};
         if (copyEventData.meta) {
             metaData = copyEventData.meta;
             delete copyEventData.meta;
         }
+
+        // Drop what a previous push added, so section data cached by an older version of this
+        // script still hashes the same as the event rendered in the page
+        Object.keys(copyEventData).forEach(function (key) {
+            if (key.indexOf('gtm.') === 0 || key === 'marketing' || key === 'device') {
+                delete copyEventData[key];
+            }
+        });
 
         // Prevent the same purchase from being triggered twice, across page loads
         const transactionId = googleTagManager2GetTransactionId(copyEventData);
@@ -112,37 +123,37 @@ declare(strict_types=1);
         }
 
         if (window.taggingHelpers) {
-            eventData.marketing = window.taggingHelpers.getMarketingObject();
-            eventData.device = window.taggingHelpers.getDeviceInfo();
+            copyEventData.marketing = window.taggingHelpers.getMarketingObject();
+            copyEventData.device = window.taggingHelpers.getDeviceInfo();
         }
 
-        if (eventData.marketing) {
+        if (copyEventData.marketing) {
             const expires = new Date();
             expires.setTime(expires.getTime() + 7 * 24 * 60 * 60 * 1000);
-            document.cookie = `trytagging_user_data=${btoa(String.fromCharCode(...new TextEncoder().encode(JSON.stringify(eventData.marketing))))};expires=${expires.toUTCString()};path=/`;
+            document.cookie = `trytagging_user_data=${btoa(String.fromCharCode(...new TextEncoder().encode(JSON.stringify(copyEventData.marketing))))};expires=${expires.toUTCString()};path=/`;
         }
 
         googleTagManager2Logger(message, eventData);
         window.dataLayer = window.dataLayer || [];
-        if (eventData && eventData.ecommerce) {
+        if (copyEventData.ecommerce) {
             window.dataLayer.push({
                 ecommerce: null
             });
         }
 
         try {
-            if ((eventData.event === 'trytagging_begin_checkout' || eventData.event === 'trytagging_view_cart') && eventData.marketing) {
-                const simpleHash = window.tagging_gtm_simple_hash(eventData);
-                const advancedHash = window.tagging_gtm_advanced_hash(eventData);
+            if ((copyEventData.event === 'trytagging_begin_checkout' || copyEventData.event === 'trytagging_view_cart') && copyEventData.marketing) {
+                const simpleHash = window.tagging_gtm_simple_hash(copyEventData);
+                const advancedHash = window.tagging_gtm_advanced_hash(copyEventData);
 
-                window.tagging_gtm_save_hash(simpleHash, eventData.marketing);
-                window.tagging_gtm_save_hash(advancedHash, eventData.marketing);
+                window.tagging_gtm_save_hash(simpleHash, copyEventData.marketing);
+                window.tagging_gtm_save_hash(advancedHash, copyEventData.marketing);
             }
         } catch (error) {
             console.error('Error generating hashes:', error);
         }
 
-        window.dataLayer.push(eventData);
+        window.dataLayer.push(copyEventData);
         window.Tagging_GTM_PAST_EVENTS.push(eventHash);
 
         if (transactionId) {

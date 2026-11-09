@@ -3,10 +3,24 @@
 namespace Tagging\GTM\DataLayer\Tag\Category;
 
 use Tagging\GTM\Api\Data\TagInterface;
+use Tagging\GTM\Util\GetCurrentProductListCollection;
 
 class CategorySize implements TagInterface
 {
-    private int $size = 0;
+    private GetCurrentProductListCollection $getCurrentProductListCollection;
+
+    /**
+     * @var int|null
+     */
+    private $size = null;
+
+    /**
+     * @param GetCurrentProductListCollection $getCurrentProductListCollection
+     */
+    public function __construct(GetCurrentProductListCollection $getCurrentProductListCollection)
+    {
+        $this->getCurrentProductListCollection = $getCurrentProductListCollection;
+    }
 
     /**
      * @param int $size
@@ -22,6 +36,12 @@ class CategorySize implements TagInterface
      */
     public function get(): int
     {
-        return $this->size;
+        if ($this->size !== null) {
+            return $this->size;
+        }
+
+        $collection = $this->getCurrentProductListCollection->get();
+
+        return $collection === null ? 0 : count($collection->getItems());
     }
 }
