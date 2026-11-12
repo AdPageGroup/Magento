@@ -236,6 +236,14 @@ class Config implements ArgumentInterface
     }
 
     /**
+     * Whether to skip storing purchase event in checkout session
+     */
+    public function isPurchaseSessionStorageDisabled(): bool
+    {
+        return (bool)$this->getModuleConfigValueAdvanced('disable_purchase_session_storage', false);
+    }
+
+    /**
      * @return bool
      */
     private function isDeveloperMode(): bool
