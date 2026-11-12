@@ -64,7 +64,40 @@
                     </depends>
                 </field>
             </group>
-            <group id="advanced" translate="label" type="text" sortOrder="2" showInDefault="1" showInWebsite="1" showInStore="1">
+            <group id="price_visibility" translate="label" type="text" sortOrder="2" showInDefault="1" showInWebsite="1" showInStore="1">
+                <label>Price visibility</label>
+                <field id="enabled" type="select" translate="label" sortOrder="1" showInDefault="1" showInWebsite="1" showInStore="1">
+                    <label>Hide prices in the dataLayer</label>
+                    <source_model>Magento\Config\Model\Config\Source\Yesno</source_model>
+                    <comment><![CDATA[Enable this on B2B stores that only show prices to logged in customers. The prices of the
+                    selected customer groups are then also kept out of the dataLayer, so they are not readable in the
+                    page source or in the browser console.<br/>
+                    <b>NOTE</b>; Order data on the success page and in the <i>order_created</i> webhook always keeps its
+                    real amounts, otherwise revenue reporting would break.]]></comment>
+                    <depends>
+                        <field id="*/settings/enabled">1</field>
+                    </depends>
+                </field>
+                <field id="customer_groups" type="multiselect" translate="label" sortOrder="2" showInDefault="1" showInWebsite="1" showInStore="1" canRestore="1">
+                    <label>Hide prices for customer groups</label>
+                    <source_model>Tagging\GTM\Model\Config\Source\CustomerGroups</source_model>
+                    <comment>Visitors in these customer groups get no prices in the dataLayer. Select "NOT LOGGED IN" to hide prices from guests.</comment>
+                    <depends>
+                        <field id="*/settings/enabled">1</field>
+                        <field id="enabled">1</field>
+                    </depends>
+                </field>
+                <field id="mode" type="select" translate="label" sortOrder="3" showInDefault="1" showInWebsite="1" showInStore="1" canRestore="1">
+                    <label>Hide prices by</label>
+                    <source_model>Tagging\GTM\Model\Config\Source\HidePriceMode</source_model>
+                    <comment>Leaving the price out is the cleanest option. Choose "Send the price as 0" when your GTM container expects the price and value keys to always be present.</comment>
+                    <depends>
+                        <field id="*/settings/enabled">1</field>
+                        <field id="enabled">1</field>
+                    </depends>
+                </field>
+            </group>
+            <group id="advanced" translate="label" type="text" sortOrder="3" showInDefault="1" showInWebsite="1" showInStore="1">
                 <label>Advanced Settings</label>
                 <attribute type="expanded">0</attribute>
                 <field id="webhook_trigger_mode" type="select" translate="label" sortOrder="1" showInDefault="1" showInWebsite="1" showInStore="1">
