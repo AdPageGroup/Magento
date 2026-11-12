@@ -7,13 +7,12 @@ namespace Tagging\GTM\Test\Integration\Page;
 use Magento\Catalog\Api\CategoryRepositoryInterface;
 use Magento\Catalog\Api\Data\CategoryInterface;
 use Magento\Catalog\Api\ProductRepositoryInterface;
-use Magento\Catalog\Block\Product\ListProduct;
+use Magento\Framework\Exception\NoSuchEntityException;
+use Magento\Framework\Indexer\IndexerRegistry;
 use Magento\Framework\Registry;
-use Magento\Framework\View\LayoutInterface;
 use Tagging\GTM\Test\Integration\FixtureTrait\CreateCategory;
 use Tagging\GTM\Test\Integration\FixtureTrait\CreateProduct;
 use Tagging\GTM\Test\Integration\PageTestCase;
-use Tagging\GTM\Util\GetCurrentCategoryProducts;
 use Yireo\IntegrationTestHelper\Test\Integration\Traits\Layout\AssertHandleInLayout;
 
 /**
@@ -25,24 +24,37 @@ class CategoryPageTest extends PageTestCase
     use CreateProduct;
     use AssertHandleInLayout;
 
+    private const CATEGORY_ID = 3;
+    private const NUMBER_OF_PRODUCTS = 3;
+
+    protected function tearDown(): void
+    {
+        $this->removeFixtures();
+        $this->reindex();
+        parent::tearDown();
+    }
+
     /**
+     * The listing reads its products from the indexes, which need DDL statements to be rebuilt.
+     * Those are not allowed within a transaction, so the fixtures are removed by hand instead.
+     *
      * @magentoConfigFixture current_store GTM/settings/enabled 1
      * @magentoConfigFixture current_store GTM/settings/serverside_gtm_url gtm.tryforwarder.com
      * @magentoAppArea frontend
      * @magentoAppIsolation enabled
-     * @magentoDbIsolation enabled
+     * @magentoDbIsolation disabled
      * @magentoCache all disabled
      */
     public function testValidDataLayerWithOneCategory()
     {
         $this->assertEnabledFlagIsWorking();
 
+        $this->removeFixtures();
 
         /** @var CategoryInterface $category */
-        $category = $this->createCategory(3);
-        $this->createProducts(3, ['category_ids' => [$category->getId()]]);
-        $products = $category->getProductCollection();
-        $this->assertTrue($products->count() >= 3, 'Product count is '.$products->count());
+        $category = $this->createCategory(self::CATEGORY_ID);
+        $this->createProducts(self::NUMBER_OF_PRODUCTS, ['category_ids' => [$category->getId()]]);
+        $this->reindex();
 
         $this->dispatch('catalog/category/view/id/' . $category->getId());
         $this->assertRequestActionName('view');
@@ -51,34 +63,19 @@ class CategoryPageTest extends PageTestCase
         $this->assertStringContainsString($category->getName(), $body);
         $this->assertStringContainsString('"trytagging_view_item_list"', $body);
 
-        $productListBlock = $this->layout->getBlock('category.products.list');
-        $productListBlock->setCollection($products);
-        $this->assertInstanceOf(ListProduct::class, $productListBlock);
-        $this->assertTrue($productListBlock->getLoadedProductCollection()->count() > 0);
-
         $block = $this->layout->getBlock('Tagging_GTM.data-layer');
         $this->assertNotEmpty($block);
 
         $this->assertDataLayerEquals($category->getName(), 'category_name');
         $this->assertDataLayerEquals($category->getId(), 'category_id');
-        $this->assertDataLayerEquals(count($productListBlock->getLoadedProductCollection()), 'category_size');
+        $this->assertDataLayerEquals(self::NUMBER_OF_PRODUCTS, 'category_size');
         $this->assertDataLayerEquals('category', 'page_type');
 
         $event = $this->getEventFromDataLayerEvents('view_item_list_event', 'trytagging_view_item_list');
         $this->assertArrayHasKey('ecommerce', $event);
         $this->assertArrayHasKey('items', $event['ecommerce']);
+        $this->assertCount(self::NUMBER_OF_PRODUCTS, $event['ecommerce']['items'], var_export($event, true));
 
-        $products = $this->getProductsByCategory($category);
-        if (!count($products) > 0) {
-            $this->markTestIncomplete('Category fixture with ID "' . $category->getId() . '" does not have any products');
-        }
-
-        $products = $this->getProductsByCurrentCategory();
-        if (!count($products) > 0) {
-            $this->markTestIncomplete('Did not detect any products on category page with ID "' . $category->getId() . '"');
-        }
-
-        $this->assertNotEmpty($event['ecommerce']['items'], var_export($event, true));
         foreach ($event['ecommerce']['items'] as $productData) {
             $this->assertNotEmpty($productData['item_id']);
             $this->assertNotEmpty($productData['item_sku']);
@@ -86,14 +83,52 @@ class CategoryPageTest extends PageTestCase
         }
     }
 
-    private function getProductsByCategory(CategoryInterface $category): array
+    /**
+     * The storefront listing only shows what the indexers have picked up, and they do not run on
+     * save while they are in "Update by Schedule" mode
+     *
+     * @return void
+     */
+    private function reindex(): void
     {
-        return $category->getProductCollection()->toArray();
+        $indexerRegistry = $this->objectManager->get(IndexerRegistry::class);
+        $indexerIds = [
+            'cataloginventory_stock',
+            'catalog_category_product',
+            'catalog_product_price',
+            'catalogsearch_fulltext',
+        ];
+
+        foreach ($indexerIds as $indexerId) {
+            $indexerRegistry->get($indexerId)->reindexAll();
+        }
     }
 
-    private function getProductsByCurrentCategory(): array
+    /**
+     * @return void
+     */
+    private function removeFixtures(): void
     {
-        $getCurrentCategoryProducts = $this->objectManager->get(GetCurrentCategoryProducts::class);
-        return $getCurrentCategoryProducts->getProducts();
+        $registry = $this->objectManager->get(Registry::class);
+        $registry->unregister('isSecureArea');
+        $registry->register('isSecureArea', true);
+
+        $productRepository = $this->objectManager->get(ProductRepositoryInterface::class);
+        for ($id = 1; $id <= self::NUMBER_OF_PRODUCTS; $id++) {
+            try {
+                $productRepository->delete($productRepository->getById($id, false, null, true));
+            } catch (NoSuchEntityException $e) {
+                continue;
+            }
+        }
+
+        $categoryRepository = $this->objectManager->get(CategoryRepositoryInterface::class);
+        try {
+            $categoryRepository->deleteByIdentifier(self::CATEGORY_ID);
+        } catch (NoSuchEntityException $e) {
+            // Nothing to remove
+        }
+
+        $registry->unregister('isSecureArea');
     }
 }
