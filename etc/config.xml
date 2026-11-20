@@ -8,5 +8,11 @@
                 <debug>0</debug>
             </settings>
         </googletagmanager2>
+        <GTM>
+            <botfilter>
+                <key backend_model="Magento\Config\Model\Config\Backend\Encrypted"/>
+                <api_url>https://data.adpage.io</api_url>
+            </botfilter>
+        </GTM>
     </default>
 </config>

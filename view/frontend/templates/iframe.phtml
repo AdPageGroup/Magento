@@ -2,12 +2,17 @@
 declare(strict_types=1);
 
 use Tagging\GTM\Config\Config;
+use Tagging\GTM\ViewModel\StorefrontFilter;
 use Magento\Framework\View\Element\Template;
 
 /** @var Config $config */
 /** @var Template $block */
 $config = $block->getConfig();
 $isHyva = isset($hyvaCsp) && $hyvaCsp;
+
+// The storefront rules of the AdPage Botfilter: empty without rules, and then this template renders what it always did
+$storefrontFilter = $block->getData('storefront_filter');
+$skipScript = $storefrontFilter instanceof StorefrontFilter ? $storefrontFilter->getSkipScript() : '';
 
 // Get SecureHtmlRenderer using Object Manager for compatibility
 $objectManager = \Magento\Framework\App\ObjectManager::getInstance();
@@ -17,16 +22,33 @@ if ($config->isEnabled() && $config->getGoogleTagmanagerUrl() && strlen($config-
     
     // First script - proxy domain
     $proxyScript = "window.tagging_proxy_domain = 'https://" . $config->getGoogleTagmanagerUrl() . "';";
-    
+
+    if ($skipScript !== '') {
+        // With Botfilter rules: no proxy domain and no user data script for a browser or page on the rules.
+        // The script is added from here instead of with a tag, after the HTML is parsed like defer did.
+        $userDataUrl = 'https://' . $config->getGoogleTagmanagerUrl() . '/user-data-minified.es.js';
+        $proxyScript = $skipScript . "\nif (!window.trytagging_skip) {\n    " . $proxyScript . "\n    (function () {\n"
+            . "        var load = function () {\n"
+            . "            var script = document.createElement('script');\n"
+            . "            script.src = " . json_encode($userDataUrl, JSON_HEX_TAG | JSON_HEX_APOS | JSON_HEX_QUOT | JSON_UNESCAPED_SLASHES) . ";\n"
+            . "            script.async = false;\n"
+            . "            document.head.appendChild(script);\n"
+            . "        };\n"
+            . "        if (document.readyState === 'loading') { document.addEventListener('DOMContentLoaded', load); } else { load(); }\n"
+            . "    })();\n}";
+    }
+
     if ($isHyva): ?>
         <script><?= $proxyScript ?></script><?php $hyvaCsp->registerInlineScript() ?>
     <?php else:
         echo $secureRenderer->renderTag('script', ['type' => 'text/javascript'], $proxyScript, false);
     endif; ?>
-    
+
+    <?php if ($skipScript === ''): ?>
     <!-- External script - no CSP needed as it's whitelisted in csp_whitelist.xml -->
     <script defer src='https://<?= $config->getGoogleTagmanagerUrl() ?>/user-data-minified.es.js'></script>
-    
+    <?php endif; ?>
+
     <?php
     // Main functionality script
     $mainScript = '
@@ -101,6 +123,15 @@ window.tagging_gtm_save_hash = function(hash, marketingObject) {
     });
 };';
     
+    if ($skipScript !== '') {
+        // Nothing to the tagging domain for a browser or page on the Botfilter rules
+        $mainScript = str_replace(
+            'window.tagging_gtm_save_hash = function(hash, marketingObject) {',
+            "window.tagging_gtm_save_hash = function(hash, marketingObject) {\n    if (window.trytagging_skip) {\n        return;\n    }",
+            $mainScript
+        );
+    }
+
     if ($isHyva): ?>
         <script><?= $mainScript ?></script><?php $hyvaCsp->registerInlineScript() ?>
     <?php else:

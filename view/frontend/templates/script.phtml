@@ -4,10 +4,15 @@ declare(strict_types=1);
 
 use Magento\Framework\View\Element\Template;
 use Tagging\GTM\Config\Config;
+use Tagging\GTM\ViewModel\StorefrontFilter;
 
 /** @var Config $config */
 /** @var Template $block */
 $config = $block->getConfig();
+
+// The storefront rules of the AdPage Botfilter: empty without rules, and then nothing below changes
+$storefrontFilter = $block->getData('storefront_filter');
+$skipScript = $storefrontFilter instanceof StorefrontFilter ? $storefrontFilter->getSkipScript() : '';
 
 // Get SecureHtmlRenderer using Object Manager for compatibility
 $objectManager = \Magento\Framework\App\ObjectManager::getInstance();
@@ -35,6 +40,10 @@ if ($config->isPlacedByPlugin()) {
 
 $scriptContent .= "\nwindow.Tagging_PLUGIN_VERSION = '{$config->getVersion()}';";
 
+if ($skipScript !== '') {
+    $scriptContent .= "\n" . $skipScript;
+}
+
 $scriptContent .= <<<SCRIPT
 
 (function(events) {
@@ -43,6 +52,11 @@ $scriptContent .= <<<SCRIPT
             window.removeEventListener(eventType, initgoogleTagManager2);
         });
 SCRIPT;
+
+// A browser or page on the Botfilter rules does not load the container, so it never reaches the tagging domain
+if ($skipScript !== '') {
+    $scriptContent .= "\n        if (window.trytagging_skip) {\n            return;\n        }";
+}
 
 if ($config->isEnabled() && $config->isPlacedByPlugin()) {
     $scriptContent .= "\n" . $config->getConfig();

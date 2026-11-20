@@ -4,5 +4,8 @@
         <job name="tagging_gtm_retry_failed_webhooks" instance="Tagging\GTM\Cron\RetryFailedWebhooks" method="execute">
             <schedule>0 */2 * * *</schedule> <!-- Run every 2 hours -->
         </job>
+        <job name="tagging_gtm_sync_botfilter_rules" instance="Tagging\GTM\Cron\SyncBotfilterRules" method="execute">
+            <schedule>*/5 * * * *</schedule> <!-- The storefront rules of the AdPage Botfilter -->
+        </job>
     </group>
 </config> 

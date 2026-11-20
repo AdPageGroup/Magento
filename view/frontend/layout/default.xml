@@ -19,6 +19,7 @@
             >
                 <arguments>
                     <argument name="config" xsi:type="object">Tagging\GTM\Config\Config</argument>
+                    <argument name="storefront_filter" xsi:type="object">Tagging\GTM\ViewModel\StorefrontFilter</argument>
                 </arguments>
             </block>
         </referenceBlock>
@@ -39,6 +40,7 @@
             >
                 <arguments>
                     <argument name="config" xsi:type="object">Tagging\GTM\Config\Config</argument>
+                    <argument name="storefront_filter" xsi:type="object">Tagging\GTM\ViewModel\StorefrontFilter</argument>
                 </arguments>
             </block>
         </referenceContainer>

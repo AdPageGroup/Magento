@@ -64,4 +64,46 @@
             </argument>
         </arguments>
     </type>
+
+    <type name="Magento\Framework\Console\CommandListInterface">
+        <arguments>
+            <argument name="commands" xsi:type="array">
+                <item name="tagging_botfilter_sync" xsi:type="object">Tagging\GTM\Console\Command\BotfilterSyncCommand</item>
+            </argument>
+        </arguments>
+    </type>
+
+    <type name="Magento\Config\Model\Config\TypePool">
+        <arguments>
+            <argument name="sensitive" xsi:type="array">
+                <item name="GTM/botfilter/key" xsi:type="string">1</item>
+            </argument>
+        </arguments>
+    </type>
+
+    <type name="Tagging\GTM\Model\Botfilter\RulesClient">
+        <arguments>
+            <argument name="logger" xsi:type="object">Tagging\GTM\Logger\CustomLogger</argument>
+        </arguments>
+    </type>
+    <type name="Tagging\GTM\Model\Botfilter\Sync">
+        <arguments>
+            <argument name="logger" xsi:type="object">Tagging\GTM\Logger\CustomLogger</argument>
+        </arguments>
+    </type>
+    <type name="Tagging\GTM\Cron\SyncBotfilterRules">
+        <arguments>
+            <argument name="logger" xsi:type="object">Tagging\GTM\Logger\CustomLogger</argument>
+        </arguments>
+    </type>
+    <type name="Tagging\GTM\Observer\SyncBotfilterAfterConfigSave">
+        <arguments>
+            <argument name="logger" xsi:type="object">Tagging\GTM\Logger\CustomLogger</argument>
+        </arguments>
+    </type>
+    <type name="Tagging\GTM\Console\Command\BotfilterSyncCommand">
+        <arguments>
+            <argument name="sync" xsi:type="object">Tagging\GTM\Model\Botfilter\Sync\Proxy</argument>
+        </arguments>
+    </type>
 </config>

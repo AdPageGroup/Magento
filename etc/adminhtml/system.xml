@@ -85,6 +85,19 @@
                     </depends>
                 </field>
             </group>
+            <group id="botfilter" translate="label" type="text" sortOrder="3" showInDefault="1" showInWebsite="1" showInStore="1">
+                <label>Botfilter</label>
+                <attribute type="expanded">0</attribute>
+                <field id="key" type="obscure" translate="label comment" sortOrder="1" showInDefault="1" showInWebsite="1" showInStore="1">
+                    <label>Botfilter key</label>
+                    <comment><![CDATA[Copy the key from the AdPage dashboard: Databoosts › Botfilter › In your Magento store. The store then fetches the storefront rules of the Botfilter every five minutes, and a browser or page that matches them does not load the tagging scripts. Orders still go out through the webhook. Leave empty to load the scripts for every visitor.<br/>
+                    <b>Note</b>: with "Choose script placement" on, the module does not place the scripts, so it cannot skip them; your own snippet can check <code>window.trytagging_skip</code>.]]></comment>
+                    <backend_model>Magento\Config\Model\Config\Backend\Encrypted</backend_model>
+                    <depends>
+                        <field id="*/settings/enabled">1</field>
+                    </depends>
+                </field>
+            </group>
         </section>
     </system>
 </config>
