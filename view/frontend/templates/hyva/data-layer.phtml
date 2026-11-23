@@ -28,11 +28,11 @@ $dataLayerEventsJsonChunks = $dataLayerViewModel->getDataLayerEventsAsJsonChunks
             }, 100); // Make sure we always sent after user_data
         } else {
             setTimeout(function() {
-                if (window.taggingHelpers) {
-                    callInitialDataLayer();
-                } else {
+                if (!window.taggingHelpers) {
                     console.log("taggingHelpers not available after wait, sending initial data layer anyway");
                 }
+
+                callInitialDataLayer();
             }, 750);
         }
     });
