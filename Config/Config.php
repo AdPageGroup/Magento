@@ -89,6 +89,17 @@ class Config implements ArgumentInterface
     }
 
     /**
+     * Checks if loading the container is skipped when it is already on the page, for example
+     * because Google tag gateway loaded it
+     *
+     * @return bool
+     */
+    public function isDuplicateContainerPrevented(): bool
+    {
+        return (bool)$this->getModuleConfigValue('prevent_duplicate_container', false);
+    }
+
+    /**
      *
      * Get the Google tag manager url. Defaults to googletagmanager.com. when field is filled return that url.
      *

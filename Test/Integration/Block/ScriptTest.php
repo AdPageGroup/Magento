@@ -33,6 +33,29 @@ class ScriptTest extends PageTestCase
         $this->assertTrue((bool)strpos($body, 'https://gtm.tryforwarder.com'), 'Script not found in HTML body: ' . $body);
         $this->assertTrue(substr_count($body, 'var ADPAGE_TEST_CONFIG = true') === 2, 'Config script found in HTML head: ' . $body);
         $this->assertTrue((bool)strpos($body, 'window.Tagging_PLACED_BY_PLUGIN = true'), 'Did not found window settings: ' . $body);
+        $this->assertStringNotContainsString('window.Tagging_CONTAINER_SKIPPED', $body, 'Container is loaded conditionally by default');
+    }
+
+    /**
+     * @magentoConfigFixture current_store GTM/settings/enabled 1
+     * @magentoConfigFixture current_store GTM/settings/config var ADPAGE_TEST_CONFIG = true
+     * @magentoConfigFixture current_store GTM/settings/serverside_gtm_url gtm.tryforwarder.com
+     * @magentoConfigFixture current_store GTM/settings/prevent_duplicate_container 1
+     */
+    public function testPreventDuplicateContainer()
+    {
+        $this->assertEnabledFlagIsWorking();
+
+        $this->layout->getUpdate()->addPageHandles(['empty', '1column']);
+        $this->layout->generateXml();
+
+        $this->dispatch('/');
+
+        $body = $this->getResponse()->getBody(); // @phpstan-ignore-line
+        // Only loading the container becomes conditional, the helper scripts stay on the page
+        $this->assertTrue((bool)strpos($body, 'https://gtm.tryforwarder.com'), 'Script not found in HTML body: ' . $body);
+        $this->assertTrue(substr_count($body, 'var ADPAGE_TEST_CONFIG = true') === 2, 'Config script not found in HTML head: ' . $body);
+        $this->assertStringContainsString('window.Tagging_CONTAINER_SKIPPED', $body, 'Container is not loaded conditionally');
     }
 
     /**

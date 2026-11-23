@@ -44,7 +44,50 @@ $scriptContent .= <<<SCRIPT
         });
 SCRIPT;
 
-if ($config->isEnabled() && $config->isPlacedByPlugin()) {
+$isContainerPlaced = $config->isEnabled() && $config->isPlacedByPlugin();
+
+if ($isContainerPlaced && $config->isDuplicateContainerPrevented()) {
+    $scriptContent .= <<<SCRIPT
+
+        const loadContainer = function() {
+SCRIPT;
+
+    $scriptContent .= "\n" . $config->getConfig();
+
+    $scriptContent .= <<<SCRIPT
+
+        };
+
+        // Google tag gateway, or another route, may have loaded this container already. It is
+        // recognised by its ID, which the container code holds with or without the GTM- prefix
+        const containerCode = loadContainer.toString();
+        const loadedContainer = Object.keys(window.google_tag_manager || {}).find(function(key) {
+            return key.indexOf('GTM-') === 0 && containerCode.indexOf(key.substring(4)) !== -1;
+        });
+
+        // Safari 16.4+ gets its cookies restored through the request for the container (Cookie
+        // Keeper), so there the container code keeps running. Same check as the container code
+        const safari = /Version\/([0-9\._]+)(.*Mobile)?.*Safari.*/.exec(navigator.userAgent);
+        const needsCookieKeeper = containerCode.indexOf('enableCK') !== -1
+            && safari !== null && parseFloat(safari[1]) >= 16.4;
+
+        window.Tagging_CONTAINER_SKIPPED = Boolean(loadedContainer) && !needsCookieKeeper;
+        if (!window.Tagging_CONTAINER_SKIPPED) {
+            loadContainer();
+            return;
+        }
+
+        // The container code also announces the page view. Google tag gateway does not, so
+        // without this the tags on a page view trigger would never fire
+        window.dataLayer = window.dataLayer || [];
+        const isPageViewAnnounced = window.dataLayer.some(function(entry) {
+            return entry && entry.event === 'gtm.js';
+        });
+        if (!isPageViewAnnounced) {
+            window.dataLayer.push({'gtm.start': new Date().getTime(), event: 'gtm.js'});
+        }
+SCRIPT;
+} elseif ($isContainerPlaced) {
     $scriptContent .= "\n" . $config->getConfig();
 }
 
