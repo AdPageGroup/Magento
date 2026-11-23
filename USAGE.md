@@ -27,8 +27,9 @@ page has loaded, whether your container is already active:
 
 The dataLayer events, the marketing data and the purchase webhook are not affected by this option.
 
-Safari 16.4 and newer keeps loading the container through the extension when your container code has Cookie
-Keeper in it, because the request for the container is also what keeps the cookies of those visitors alive.
+Cookie Keeper is delivered with the container that the extension loads. For a visitor with an active Cookie
+Keeper the extension therefore keeps loading the container itself: that is Safari 16.4 or newer, with Cookie
+Keeper in your container code and the `_taggingmk` cookie set. Every other visitor gets the container once.
 
 To check the result, open your shop and type `window.Tagging_CONTAINER_SKIPPED` in the browser console. It is
 `true` when the extension left the loading to the gateway.

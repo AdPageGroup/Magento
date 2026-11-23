@@ -67,7 +67,7 @@
                     <label>Prevent duplicate GTM container</label>
                     <source_model>Magento\Config\Model\Config\Source\Yesno</source_model>
                     <comment><![CDATA[<span>Enable this option when Google tag gateway (or another route) already loads your GTM container. The plugin then only loads the container when it is not on the page yet, so it is not downloaded twice. Events, marketing data and webhooks keep working.</span><br/>
-                    <b>NOTE</b>; Safari 16.4 and newer keeps loading the container through the plugin, because that request also keeps its cookies alive (Cookie Keeper). ]]></comment>
+                    <b>NOTE</b>; For visitors with an active Cookie Keeper (Safari 16.4 and newer with the _taggingmk cookie) the plugin keeps loading the container, because Cookie Keeper is delivered with it. ]]></comment>
                     <depends>
                         <field id="enabled">1</field>
                         <field id="choose_script_placement">0</field>

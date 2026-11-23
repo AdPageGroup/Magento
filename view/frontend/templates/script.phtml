@@ -65,11 +65,13 @@ SCRIPT;
             return key.indexOf('GTM-') === 0 && containerCode.indexOf(key.substring(4)) !== -1;
         });
 
-        // Safari 16.4+ gets its cookies restored through the request for the container (Cookie
-        // Keeper), so there the container code keeps running. Same check as the container code
+        // Cookie Keeper is delivered with the container: for Safari 16.4+ the response carries the
+        // call that lets the server restore the cookies of the visitor in the _taggingmk cookie.
+        // Without that cookie there is nothing to restore, and the container can be skipped
         const safari = /Version\/([0-9\._]+)(.*Mobile)?.*Safari.*/.exec(navigator.userAgent);
         const needsCookieKeeper = containerCode.indexOf('enableCK') !== -1
-            && safari !== null && parseFloat(safari[1]) >= 16.4;
+            && safari !== null && parseFloat(safari[1]) >= 16.4
+            && /(^|;\s*)_taggingmk=/.test(document.cookie);
 
         window.Tagging_CONTAINER_SKIPPED = Boolean(loadedContainer) && !needsCookieKeeper;
         if (!window.Tagging_CONTAINER_SKIPPED) {
