@@ -100,6 +100,23 @@ class Config implements ArgumentInterface
     }
 
     /**
+     * Checks if the helper script of the tagging domain is placed inline in the page instead of loaded from there.
+     * On by default; read with isSetFlag() because getModuleConfigValue() turns a 0 into the default
+     *
+     * @return bool
+     */
+    public function isHelperScriptInline(): bool
+    {
+        try {
+            $store = $this->storeManager->getStore();
+        } catch (NoSuchEntityException $e) {
+            return false;
+        }
+
+        return $this->scopeConfig->isSetFlag('GTM/settings/inline_helper_script', ScopeInterface::SCOPE_STORE, $store);
+    }
+
+    /**
      *
      * Get the Google tag manager url. Defaults to googletagmanager.com. when field is filled return that url.
      *

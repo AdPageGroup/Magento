@@ -31,19 +31,34 @@ $scriptContent .= "}\n\n";
 
 $scriptContent .= <<<SCRIPT
 document.addEventListener("DOMContentLoaded", function() {
-    if (window.taggingHelpers) {
+    // The helper script adds the marketing and device data to the events. Placed inline it is always there,
+    // loaded from the tagging domain it can arrive late or be blocked. The events are sent either way
+    var timeout;
+    var isSent = false;
+    var sendInitialDataLayer = function() {
+        if (isSent) {
+            return;
+        }
+
+        isSent = true;
+        clearTimeout(timeout);
+        if (!window.taggingHelpers) {
+            console.log("taggingHelpers not available, sending initial data layer without marketing data");
+        }
+
         setTimeout(function() {
             callInitialDataLayer();
         }, 100); // Make sure we always sent after user_data
-    } else {
-        setTimeout(function() {
-            if (!window.taggingHelpers) {
-                console.log("taggingHelpers not available after wait, sending initial data layer anyway");
-            }
+    };
 
-            callInitialDataLayer();
-        }, 750);
+    if (window.taggingHelpers || window.Tagging_HELPER_SCRIPT_FAILED) {
+        sendInitialDataLayer();
+        return;
     }
+
+    document.addEventListener("trytagging_user_data_ready", sendInitialDataLayer);
+    document.addEventListener("trytagging_user_data_failed", sendInitialDataLayer);
+    timeout = setTimeout(sendInitialDataLayer, 3000);
 });
 
 require(['googleTagManagerPush'], function(pusher) {
