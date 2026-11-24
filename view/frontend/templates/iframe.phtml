@@ -2,11 +2,14 @@
 declare(strict_types=1);
 
 use Tagging\GTM\Config\Config;
+use Tagging\GTM\ViewModel\HelperScript;
 use Magento\Framework\View\Element\Template;
 
 /** @var Config $config */
 /** @var Template $block */
 $config = $block->getConfig();
+/** @var HelperScript|null $helperScript */
+$helperScript = $block->getHelperScript();
 $isHyva = isset($hyvaCsp) && $hyvaCsp;
 
 // Get SecureHtmlRenderer using Object Manager for compatibility
@@ -24,10 +27,39 @@ if ($config->isEnabled() && $config->getGoogleTagmanagerUrl() && strlen($config-
         echo $secureRenderer->renderTag('script', ['type' => 'text/javascript'], $proxyScript, false);
     endif; ?>
     
-    <!-- External script - no CSP needed as it's whitelisted in csp_whitelist.xml -->
-    <script defer src='https://<?= $config->getGoogleTagmanagerUrl() ?>/user-data-minified.es.js'></script>
-    
     <?php
+    // Helper script (window.taggingHelpers), placed inline when the plugin has a copy of it: it is then there
+    // before the dataLayer events are sent, and ad blockers do not see the tagging domain
+    $inlineHelperScript = $helperScript ? $helperScript->getInlineScript() : null;
+    if ($inlineHelperScript !== null):
+        $inlineHelperScript .= "\nwindow.Tagging_HELPER_SCRIPT = 'inline';";
+
+        if ($isHyva): ?>
+            <script><?= /* @noEscape */ $inlineHelperScript ?></script><?php $hyvaCsp->registerInlineScript() ?>
+        <?php else:
+            echo $secureRenderer->renderTag('script', ['type' => 'text/javascript'], $inlineHelperScript, false);
+        endif;
+    else:
+        $helperScriptUrl = $helperScript
+            ? $helperScript->getUrl()
+            : 'https://' . $config->getGoogleTagmanagerUrl() . '/user-data-minified.es.js';
+        ?>
+        <!-- External script - no CSP needed as it's whitelisted in csp_whitelist.xml -->
+        <script id="tagging-helper-script" defer src="<?= $block->escapeUrl($helperScriptUrl) ?>"></script>
+        <?php
+        // Lets the dataLayer events go out right away when the script cannot be loaded, instead of waiting for it
+        $helperScriptListener = "window.Tagging_HELPER_SCRIPT = 'external';
+document.getElementById('tagging-helper-script').addEventListener('error', function() {
+    window.Tagging_HELPER_SCRIPT_FAILED = true;
+    document.dispatchEvent(new CustomEvent('trytagging_user_data_failed'));
+});";
+
+        if ($isHyva): ?>
+            <script><?= /* @noEscape */ $helperScriptListener ?></script><?php $hyvaCsp->registerInlineScript() ?>
+        <?php else:
+            echo $secureRenderer->renderTag('script', ['type' => 'text/javascript'], $helperScriptListener, false);
+        endif;
+    endif;
     // Main functionality script
     $mainScript = '
 /**

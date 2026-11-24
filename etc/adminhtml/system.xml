@@ -63,6 +63,26 @@
                         <field id="enabled">1</field>
                     </depends>
                 </field>
+                <field id="prevent_duplicate_container" type="select" translate="label" sortOrder="6" showInDefault="1" showInWebsite="1" showInStore="1">
+                    <label>Prevent duplicate GTM container</label>
+                    <source_model>Magento\Config\Model\Config\Source\Yesno</source_model>
+                    <comment><![CDATA[<span>Enable this option when Google tag gateway (or another route) already loads your GTM container. The plugin then only loads the container when it is not on the page yet, so it is not downloaded twice. Events, marketing data and webhooks keep working.</span><br/>
+                    <b>NOTE</b>; For visitors with an active Cookie Keeper (Safari 16.4 and newer with the _taggingmk cookie) the plugin keeps loading the container, because Cookie Keeper is delivered with it. ]]></comment>
+                    <depends>
+                        <field id="enabled">1</field>
+                        <field id="choose_script_placement">0</field>
+                    </depends>
+                </field>
+                <field id="inline_helper_script" type="select" translate="label" sortOrder="7" showInDefault="1" showInWebsite="1" showInStore="1">
+                    <label>Place helper script inline</label>
+                    <source_model>Magento\Config\Model\Config\Source\Yesno</source_model>
+                    <comment><![CDATA[<span>The helper script adds marketing and device data to the events. With this option the plugin downloads it from your container URL, keeps a copy for an hour and places it in the page, so it is there before the events are sent and ad blockers do not stop it.</span><br/>
+                    <b>NOTE</b>; Set this to NO to load the script from your container URL in the browser instead. ]]></comment>
+                    <depends>
+                        <field id="enabled">1</field>
+                        <field id="choose_script_placement">0</field>
+                    </depends>
+                </field>
             </group>
             <group id="advanced" translate="label" type="text" sortOrder="2" showInDefault="1" showInWebsite="1" showInStore="1">
                 <label>Advanced Settings</label>
