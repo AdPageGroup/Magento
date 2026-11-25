@@ -16,6 +16,9 @@ declare(strict_types=1);
     window.Tagging_GTM_PURCHASE_EVENT = 'trytagging_purchase';
     window.Tagging_GTM_PUSHED_TRANSACTIONS_KEY = 'tagging_gtm_pushed_transactions';
     window.Tagging_GTM_PUSHED_TRANSACTIONS_MAX = 50;
+    window.Tagging_GTM_PUSHED_EVENT_KEYS_KEY = 'tagging_gtm_pushed_event_keys';
+    window.Tagging_GTM_PUSHED_EVENT_KEYS_MAX = 50;
+    window.Tagging_GTM_SESSION_EVENT_MAX_AGE = 2 * 60 * 60;
 
     /**
      * Serialize with the object keys sorted, so that two events holding the same
@@ -63,6 +66,57 @@ declare(strict_types=1);
         }
     }
 
+    function googleTagManager2GetPushedEventKeys() {
+        try {
+            const stored = JSON.parse(window.localStorage.getItem(window.Tagging_GTM_PUSHED_EVENT_KEYS_KEY) || '[]');
+
+            return Array.isArray(stored) ? stored : [];
+        } catch (error) {
+            // No storage available, fall back to the max age guard only
+            return [];
+        }
+    }
+
+    function googleTagManager2RememberEventKey(eventKey) {
+        try {
+            const eventKeys = googleTagManager2GetPushedEventKeys();
+            eventKeys.push(eventKey);
+
+            window.localStorage.setItem(
+                window.Tagging_GTM_PUSHED_EVENT_KEYS_KEY,
+                JSON.stringify(eventKeys.slice(-window.Tagging_GTM_PUSHED_EVENT_KEYS_MAX))
+            );
+        } catch (error) {
+            // No storage available, fall back to the max age guard only
+        }
+    }
+
+    /**
+     * The key of a non-cacheable event that was queued in the session, or null.
+     * Such an event can be delivered again by a later section load, or replayed
+     * from the section data that Hyvä caches in localStorage.
+     */
+    function googleTagManager2GetEventKey(metaData) {
+        if (!metaData || metaData.cacheable === true || !metaData.event_key) {
+            return null;
+        }
+
+        return String(metaData.event_key);
+    }
+
+    /**
+     * Fallback for when the pushed keys are not available: an event that was
+     * queued in the session this long ago is a replay, not a new occurrence.
+     */
+    function googleTagManager2IsExpired(metaData) {
+        const createdAt = Number(metaData.created_at);
+        if (!createdAt) {
+            return false;
+        }
+
+        return Date.now() / 1000 - createdAt > window.Tagging_GTM_SESSION_EVENT_MAX_AGE;
+    }
+
     /**
      * The transaction a purchase event belongs to, or null for any other event.
      * The in-memory guard is reset on every page load, so purchases are also
@@ -103,6 +157,18 @@ declare(strict_types=1);
         const transactionId = googleTagManager2GetTransactionId(copyEventData);
         if (transactionId && googleTagManager2GetPushedTransactions().includes(transactionId)) {
             googleTagManager2Logger('Warning: Purchase already triggered for transaction "' + transactionId + '"', eventData);
+            return;
+        }
+
+        // Prevent a session event from being replayed, across page loads
+        const eventKey = googleTagManager2GetEventKey(metaData);
+        if (eventKey && googleTagManager2GetPushedEventKeys().includes(eventKey)) {
+            googleTagManager2Logger('Warning: Event "' + eventKey + '" already triggered', eventData);
+            return;
+        }
+
+        if (eventKey && googleTagManager2IsExpired(metaData)) {
+            googleTagManager2Logger('Warning: Skipping expired event "' + eventKey + '"', eventData);
             return;
         }
 
@@ -158,6 +224,10 @@ declare(strict_types=1);
 
         if (transactionId) {
             googleTagManager2RememberTransaction(transactionId);
+        }
+
+        if (eventKey) {
+            googleTagManager2RememberEventKey(eventKey);
         }
     }
 </script><?php if (isset($hyvaCsp) && $hyvaCsp): ?><?php $hyvaCsp->registerInlineScript() ?><?php endif; ?>

@@ -2,6 +2,9 @@ define(["googleTagManagerLogger"], function (logger) {
   const PURCHASE_EVENT = "trytagging_purchase";
   const PUSHED_TRANSACTIONS_KEY = "tagging_gtm_pushed_transactions";
   const PUSHED_TRANSACTIONS_MAX = 50;
+  const PUSHED_EVENT_KEYS_KEY = "tagging_gtm_pushed_event_keys";
+  const PUSHED_EVENT_KEYS_MAX = 50;
+  const SESSION_EVENT_MAX_AGE = 2 * 60 * 60;
 
   /**
    * Serialize with the object keys sorted, so that two events holding the same
@@ -56,6 +59,59 @@ define(["googleTagManagerLogger"], function (logger) {
     } catch (error) {
       // No storage available, fall back to the in-memory guard only
     }
+  };
+
+  const getPushedEventKeys = function () {
+    try {
+      const stored = JSON.parse(
+        window.localStorage.getItem(PUSHED_EVENT_KEYS_KEY) || "[]"
+      );
+
+      return Array.isArray(stored) ? stored : [];
+    } catch (error) {
+      // No storage available, fall back to the max age guard only
+      return [];
+    }
+  };
+
+  const rememberEventKey = function (eventKey) {
+    try {
+      const eventKeys = getPushedEventKeys();
+      eventKeys.push(eventKey);
+
+      window.localStorage.setItem(
+        PUSHED_EVENT_KEYS_KEY,
+        JSON.stringify(eventKeys.slice(-PUSHED_EVENT_KEYS_MAX))
+      );
+    } catch (error) {
+      // No storage available, fall back to the max age guard only
+    }
+  };
+
+  /**
+   * The key of a non-cacheable event that was queued in the session, or null.
+   * Such an event can be delivered again by a later section load, or replayed
+   * from the section data that Hyvä caches in localStorage.
+   */
+  const getEventKey = function (metaData) {
+    if (!metaData || metaData.cacheable === true || !metaData.event_key) {
+      return null;
+    }
+
+    return String(metaData.event_key);
+  };
+
+  /**
+   * Fallback for when the pushed keys are not available: an event that was
+   * queued in the session this long ago is a replay, not a new occurrence.
+   */
+  const isExpired = function (metaData) {
+    const createdAt = Number(metaData.created_at);
+    if (!createdAt) {
+      return false;
+    }
+
+    return Date.now() / 1000 - createdAt > SESSION_EVENT_MAX_AGE;
   };
 
   /**
@@ -116,6 +172,18 @@ define(["googleTagManagerLogger"], function (logger) {
       return;
     }
 
+    // Prevent a session event from being replayed, across page loads
+    const eventKey = getEventKey(metaData);
+    if (eventKey && getPushedEventKeys().includes(eventKey)) {
+      logger('Warning: Event "' + eventKey + '" already triggered', eventData);
+      return;
+    }
+
+    if (eventKey && isExpired(metaData)) {
+      logger('Warning: Skipping expired event "' + eventKey + '"', eventData);
+      return;
+    }
+
     // Prevent the same event from being triggered twice, when containing the same data
     const eventHash = btoa(encodeURIComponent(stableStringify(cleanEventData)));
     if (window.Tagging_GTM_PAST_EVENTS.includes(eventHash)) {
@@ -169,6 +237,10 @@ define(["googleTagManagerLogger"], function (logger) {
 
     if (transactionId) {
       rememberTransaction(transactionId);
+    }
+
+    if (eventKey) {
+      rememberEventKey(eventKey);
     }
   };
 });
