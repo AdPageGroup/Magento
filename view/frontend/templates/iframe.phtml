@@ -2,6 +2,7 @@
 declare(strict_types=1);
 
 use Tagging\GTM\Config\Config;
+use Tagging\GTM\ViewModel\AgentFilter;
 use Tagging\GTM\ViewModel\HelperScript;
 use Magento\Framework\View\Element\Template;
 
@@ -12,6 +13,14 @@ $config = $block->getConfig();
 $helperScript = $block->getHelperScript();
 $isHyva = isset($hyvaCsp) && $hyvaCsp;
 
+// Sets window.trytagging_skip for a visitor on the agent filter list. Empty without a list, and then this template
+// renders what it always did
+$agentFilter = $block->getData('agent_filter');
+$skipScript = $agentFilter instanceof AgentFilter ? $agentFilter->getSkipScript() : '';
+
+// What a skipped visitor gets instead of the helper script: the dataLayer events go out right away, without it
+$helperScriptSkipped = "window.Tagging_HELPER_SCRIPT = 'skipped';\nwindow.Tagging_HELPER_SCRIPT_FAILED = true;";
+
 // Get SecureHtmlRenderer using Object Manager for compatibility
 $objectManager = \Magento\Framework\App\ObjectManager::getInstance();
 $secureRenderer = $objectManager->get(\Magento\Framework\View\Helper\SecureHtmlRenderer::class);
@@ -20,6 +29,10 @@ if ($config->isEnabled() && $config->getGoogleTagmanagerUrl() && strlen($config-
     
     // First script - proxy domain
     $proxyScript = "window.tagging_proxy_domain = 'https://" . $config->getGoogleTagmanagerUrl() . "';";
+    if ($skipScript !== '') {
+        // Usually script.phtml has decided already, this copy only counts when it is not on the page
+        $proxyScript = $skipScript . "\n" . $proxyScript;
+    }
     
     if ($isHyva): ?>
         <script><?= $proxyScript ?></script><?php $hyvaCsp->registerInlineScript() ?>
@@ -33,6 +46,10 @@ if ($config->isEnabled() && $config->getGoogleTagmanagerUrl() && strlen($config-
     $inlineHelperScript = $helperScript ? $helperScript->getInlineScript() : null;
     if ($inlineHelperScript !== null):
         $inlineHelperScript .= "\nwindow.Tagging_HELPER_SCRIPT = 'inline';";
+        if ($skipScript !== '') {
+            $inlineHelperScript = "if (!window.trytagging_skip) {\n" . $inlineHelperScript . "\n} else {\n"
+                . $helperScriptSkipped . "\n}";
+        }
 
         if ($isHyva): ?>
             <script><?= /* @noEscape */ $inlineHelperScript ?></script><?php $hyvaCsp->registerInlineScript() ?>
@@ -43,16 +60,31 @@ if ($config->isEnabled() && $config->getGoogleTagmanagerUrl() && strlen($config-
         $helperScriptUrl = $helperScript
             ? $helperScript->getUrl()
             : 'https://' . $config->getGoogleTagmanagerUrl() . '/user-data-minified.es.js';
+
+        if ($skipScript === ''):
         ?>
         <!-- External script - no CSP needed as it's whitelisted in csp_whitelist.xml -->
         <script id="tagging-helper-script" defer src="<?= $block->escapeUrl($helperScriptUrl) ?>"></script>
         <?php
+        endif;
+
         // Lets the dataLayer events go out right away when the script cannot be loaded, instead of waiting for it
         $helperScriptListener = "window.Tagging_HELPER_SCRIPT = 'external';
 document.getElementById('tagging-helper-script').addEventListener('error', function() {
     window.Tagging_HELPER_SCRIPT_FAILED = true;
     document.dispatchEvent(new CustomEvent('trytagging_user_data_failed'));
 });";
+
+        if ($skipScript !== '') {
+            // With an agent filter list the script is added from here, and only for a visitor who is not on it
+            $helperScriptListener = "if (window.trytagging_skip) {\n" . $helperScriptSkipped . "\n} else {\n"
+                . "var taggingHelperScript = document.createElement('script');\n"
+                . "taggingHelperScript.id = 'tagging-helper-script';\n"
+                . "taggingHelperScript.src = " . json_encode($helperScriptUrl, JSON_HEX_TAG | JSON_HEX_AMP | JSON_HEX_APOS | JSON_HEX_QUOT) . ";\n"
+                . "taggingHelperScript.async = false;\n"
+                . "document.head.appendChild(taggingHelperScript);\n"
+                . $helperScriptListener . "\n}";
+        }
 
         if ($isHyva): ?>
             <script><?= /* @noEscape */ $helperScriptListener ?></script><?php $hyvaCsp->registerInlineScript() ?>
@@ -110,7 +142,11 @@ window.tagging_gtm_advanced_hash = function(eventData) {
     return btoa(value);
 };
 
-window.tagging_gtm_save_hash = function(hash, marketingObject) {
+window.tagging_gtm_save_hash = function(hash, marketingObject) {' . ($skipScript !== '' ? '
+    // A visitor on the agent filter list sends nothing to the tagging domain
+    if (window.trytagging_skip) {
+        return;
+    }' : '') . '
     if (!hash || !marketingObject) {
         console.error("Hash or marketingObject is missing");
         return;

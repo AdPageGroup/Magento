@@ -19,6 +19,7 @@
             >
                 <arguments>
                     <argument name="config" xsi:type="object">Tagging\GTM\Config\Config</argument>
+                    <argument name="agent_filter" xsi:type="object">Tagging\GTM\ViewModel\AgentFilter</argument>
                 </arguments>
             </block>
         </referenceBlock>
@@ -40,6 +41,7 @@
                 <arguments>
                     <argument name="config" xsi:type="object">Tagging\GTM\Config\Config</argument>
                     <argument name="helper_script" xsi:type="object">Tagging\GTM\ViewModel\HelperScript</argument>
+                    <argument name="agent_filter" xsi:type="object">Tagging\GTM\ViewModel\AgentFilter</argument>
                 </arguments>
             </block>
         </referenceContainer>
