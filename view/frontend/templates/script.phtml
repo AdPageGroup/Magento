@@ -4,10 +4,15 @@ declare(strict_types=1);
 
 use Magento\Framework\View\Element\Template;
 use Tagging\GTM\Config\Config;
+use Tagging\GTM\ViewModel\AgentFilter;
 
 /** @var Config $config */
 /** @var Template $block */
 $config = $block->getConfig();
+
+// Sets window.trytagging_skip for a visitor the agent filter matches. Empty when nothing is filtered, and then nothing below changes
+$agentFilter = $block->getData('agent_filter');
+$skipScript = $agentFilter instanceof AgentFilter ? $agentFilter->getSkipScript() : '';
 
 // Get SecureHtmlRenderer using Object Manager for compatibility
 $objectManager = \Magento\Framework\App\ObjectManager::getInstance();
@@ -35,6 +40,10 @@ if ($config->isPlacedByPlugin()) {
 
 $scriptContent .= "\nwindow.Tagging_PLUGIN_VERSION = '{$config->getVersion()}';";
 
+if ($skipScript !== '') {
+    $scriptContent .= "\n" . $skipScript;
+}
+
 $scriptContent .= <<<SCRIPT
 
 (function(events) {
@@ -43,6 +52,11 @@ $scriptContent .= <<<SCRIPT
             window.removeEventListener(eventType, initgoogleTagManager2);
         });
 SCRIPT;
+
+// A visitor the agent filter matches does not load the container, so it never reaches the tagging domain
+if ($skipScript !== '') {
+    $scriptContent .= "\n        if (window.trytagging_skip) {\n            return;\n        }";
+}
 
 $isContainerPlaced = $config->isEnabled() && $config->isPlacedByPlugin();
 
