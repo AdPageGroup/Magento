@@ -13,7 +13,7 @@ $config = $block->getConfig();
 $helperScript = $block->getHelperScript();
 $isHyva = isset($hyvaCsp) && $hyvaCsp;
 
-// Sets window.trytagging_skip for a visitor on the agent filter list. Empty without a list, and then this template
+// Sets window.trytagging_skip for a visitor the agent filter matches. Empty when nothing is filtered, and then this template
 // renders what it always did
 $agentFilter = $block->getData('agent_filter');
 $skipScript = $agentFilter instanceof AgentFilter ? $agentFilter->getSkipScript() : '';
@@ -76,7 +76,7 @@ document.getElementById('tagging-helper-script').addEventListener('error', funct
 });";
 
         if ($skipScript !== '') {
-            // With an agent filter list the script is added from here, and only for a visitor who is not on it
+            // With an agent filter the script is added from here, and only for a visitor it does not match
             $helperScriptListener = "if (window.trytagging_skip) {\n" . $helperScriptSkipped . "\n} else {\n"
                 . "var taggingHelperScript = document.createElement('script');\n"
                 . "taggingHelperScript.id = 'tagging-helper-script';\n"
@@ -143,7 +143,7 @@ window.tagging_gtm_advanced_hash = function(eventData) {
 };
 
 window.tagging_gtm_save_hash = function(hash, marketingObject) {' . ($skipScript !== '' ? '
-    // A visitor on the agent filter list sends nothing to the tagging domain
+    // A visitor the agent filter matches sends nothing to the tagging domain
     if (window.trytagging_skip) {
         return;
     }' : '') . '

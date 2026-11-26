@@ -10,7 +10,7 @@ use Tagging\GTM\ViewModel\AgentFilter;
 /** @var Template $block */
 $config = $block->getConfig();
 
-// Sets window.trytagging_skip for a visitor on the agent filter list. Empty without a list, and then nothing below changes
+// Sets window.trytagging_skip for a visitor the agent filter matches. Empty when nothing is filtered, and then nothing below changes
 $agentFilter = $block->getData('agent_filter');
 $skipScript = $agentFilter instanceof AgentFilter ? $agentFilter->getSkipScript() : '';
 
@@ -53,7 +53,7 @@ $scriptContent .= <<<SCRIPT
         });
 SCRIPT;
 
-// A visitor on the agent filter list does not load the container, so it never reaches the tagging domain
+// A visitor the agent filter matches does not load the container, so it never reaches the tagging domain
 if ($skipScript !== '') {
     $scriptContent .= "\n        if (window.trytagging_skip) {\n            return;\n        }";
 }

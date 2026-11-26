@@ -9,7 +9,7 @@ use Tagging\GTM\Logger\Debugger;
 use Throwable;
 
 /**
- * Downloads the agent filter list of the container from the tagging domain
+ * Downloads the agent filter of the container from the tagging domain
  */
 class Fetcher
 {
@@ -32,9 +32,9 @@ class Fetcher
     }
 
     /**
-     * @return string[]|null The valid User-Agent pieces, or null when the list could not be downloaded
+     * @return Filter|null The filter, or null when it could not be downloaded
      */
-    public function fetch(string $domain, int $timeoutMs): ?array
+    public function fetch(string $domain, int $timeoutMs): ?Filter
     {
         $url = $this->getUrl($domain);
         $client = $this->clientFactory->create();
@@ -62,10 +62,11 @@ class Fetcher
 
         $data = json_decode((string)$client->getBody(), true);
         if (!is_array($data) || !array_key_exists('userAgents', $data) || !is_array($data['userAgents'])) {
-            $this->debugger->debug('AgentFilter: ' . $url . ' did not return a list');
+            $this->debugger->debug('AgentFilter: ' . $url . ' did not return a filter');
             return null;
         }
 
-        return UserAgentList::clean($data['userAgents']);
+        // A tagging domain from before automation existed leaves it out: off
+        return Filter::fromArray($data);
     }
 }

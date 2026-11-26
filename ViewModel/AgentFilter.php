@@ -6,12 +6,13 @@ namespace Tagging\GTM\ViewModel;
 
 use Magento\Framework\View\Element\Block\ArgumentInterface;
 use Tagging\GTM\Config\Config;
+use Tagging\GTM\Model\AgentFilter\Filter;
 use Tagging\GTM\Model\AgentFilter\Loader;
 use Tagging\GTM\Model\AgentFilter\SkipScript;
 use Throwable;
 
 /**
- * The agent filter list of the container: visitors whose User-Agent is on it do not load the tagging scripts
+ * The agent filter of the container: visitors it matches do not load the tagging scripts
  */
 class AgentFilter implements ArgumentInterface
 {
@@ -28,37 +29,34 @@ class AgentFilter implements ArgumentInterface
     }
 
     /**
-     * @return string The script that sets window.trytagging_skip, empty when there is no list
+     * @return string The script that sets window.trytagging_skip, empty when nothing is filtered
      */
     public function getSkipScript(): string
     {
         if ($this->skipScript === null) {
-            $this->skipScript = SkipScript::render($this->getUserAgents());
+            $this->skipScript = SkipScript::render($this->getFilter());
         }
 
         return $this->skipScript;
     }
 
-    /**
-     * @return string[]
-     */
-    private function getUserAgents(): array
+    private function getFilter(): Filter
     {
         if (!$this->config->isEnabled()) {
-            return [];
+            return Filter::none();
         }
 
         // A host name, optionally with a port. Anything else is not downloaded
         $domain = trim((string)$this->config->getGoogleTagmanagerUrl());
         if (!preg_match('/^[a-z0-9.-]+(:[0-9]+)?$/i', $domain)) {
-            return [];
+            return Filter::none();
         }
 
         try {
-            return $this->loader->getUserAgents($domain);
+            return $this->loader->getFilter($domain);
         } catch (Throwable $e) {
-            // Fail-open: without a list everything loads as before
-            return [];
+            // Fail-open: without a filter everything loads as before
+            return Filter::none();
         }
     }
 }

@@ -32,7 +32,7 @@ class FetcherTest extends TestCase
         $this->fetcher = new Fetcher($clientFactory, $this->createMock(Debugger::class));
     }
 
-    public function testDownloadsAndChecksTheList(): void
+    public function testDownloadsAndChecksTheFilter(): void
     {
         $this->client->expects($this->once())
             ->method('get')
@@ -43,20 +43,41 @@ class FetcherTest extends TestCase
                 return $options[CURLOPT_TIMEOUT_MS] === 1000 && $options[CURLOPT_CONNECTTIMEOUT_MS] === 1000;
             }));
         $this->client->method('getStatus')->willReturn(200);
-        $this->client->method('getBody')->willReturn('{"userAgents":["meta-webindexer","<script>"]}');
+        $this->client->method('getBody')
+            ->willReturn('{"userAgents":["meta-webindexer","<script>"],"automation":true}');
 
-        $this->assertSame(['meta-webindexer'], $this->fetcher->fetch('tagging.example.com', 1000));
+        $filter = $this->fetcher->fetch('tagging.example.com', 1000);
+        $this->assertSame(['meta-webindexer'], $filter->getUserAgents());
+        $this->assertTrue($filter->isAutomation());
     }
 
-    public function testAnEmptyListIsAList(): void
+    public function testAutomationIsOffWhenTheTaggingDomainLeavesItOut(): void
     {
         $this->client->method('getStatus')->willReturn(200);
-        $this->client->method('getBody')->willReturn('{"userAgents":[]}');
+        $this->client->method('getBody')->willReturn('{"userAgents":["meta-webindexer"]}');
 
-        $this->assertSame([], $this->fetcher->fetch('tagging.example.com', 1000));
+        $this->assertFalse($this->fetcher->fetch('tagging.example.com', 1000)->isAutomation());
     }
 
-    public function testErrorStatusGivesNoList(): void
+    public function testAutomationMustBeTrueItself(): void
+    {
+        $this->client->method('getStatus')->willReturn(200);
+        $this->client->method('getBody')->willReturn('{"userAgents":[],"automation":"yes"}');
+
+        $this->assertFalse($this->fetcher->fetch('tagging.example.com', 1000)->isAutomation());
+    }
+
+    public function testAnEmptyFilterIsAFilter(): void
+    {
+        $this->client->method('getStatus')->willReturn(200);
+        $this->client->method('getBody')->willReturn('{"userAgents":[],"automation":false}');
+
+        $filter = $this->fetcher->fetch('tagging.example.com', 1000);
+        $this->assertNotNull($filter);
+        $this->assertTrue($filter->isEmpty());
+    }
+
+    public function testErrorStatusGivesNoFilter(): void
     {
         $this->client->method('getStatus')->willReturn(404);
         $this->client->method('getBody')->willReturn('{"userAgents":["meta-webindexer"]}');
@@ -64,7 +85,7 @@ class FetcherTest extends TestCase
         $this->assertNull($this->fetcher->fetch('tagging.example.com', 1000));
     }
 
-    public function testSomethingElseThanAListGivesNoList(): void
+    public function testSomethingElseGivesNoFilter(): void
     {
         $this->client->method('getStatus')->willReturn(200);
         $this->client->method('getBody')->willReturn('<html>Not found</html>');
@@ -72,7 +93,7 @@ class FetcherTest extends TestCase
         $this->assertNull($this->fetcher->fetch('tagging.example.com', 1000));
     }
 
-    public function testConnectionErrorGivesNoList(): void
+    public function testConnectionErrorGivesNoFilter(): void
     {
         $this->client->method('get')->willThrowException(new Exception('timeout'));
 

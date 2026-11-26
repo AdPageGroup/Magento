@@ -9,6 +9,7 @@ use Magento\Framework\Stdlib\DateTime\DateTime;
 use PHPUnit\Framework\MockObject\MockObject;
 use PHPUnit\Framework\TestCase;
 use Tagging\GTM\Model\AgentFilter\Fetcher;
+use Tagging\GTM\Model\AgentFilter\Filter;
 use Tagging\GTM\Model\AgentFilter\Loader;
 
 class LoaderTest extends TestCase
@@ -51,10 +52,12 @@ class LoaderTest extends TestCase
 
     public function testUsesAFreshCopyWithoutDownloading(): void
     {
-        $this->givenCache(['meta-webindexer'], self::NOW - Loader::FRESH_SECONDS + 1);
+        $this->givenCache(['userAgents' => ['meta-webindexer'], 'automation' => true], self::NOW - Loader::FRESH_SECONDS + 1);
         $this->fetcher->expects($this->never())->method('fetch');
 
-        $this->assertSame(['meta-webindexer'], $this->loader->getUserAgents(self::DOMAIN));
+        $filter = $this->loader->getFilter(self::DOMAIN);
+        $this->assertSame(['meta-webindexer'], $filter->getUserAgents());
+        $this->assertTrue($filter->isAutomation());
     }
 
     public function testDownloadsWithoutACopyAndKeepsTheResult(): void
@@ -63,58 +66,74 @@ class LoaderTest extends TestCase
         $this->fetcher->expects($this->once())
             ->method('fetch')
             ->with(self::DOMAIN, Loader::TIMEOUT_MS)
-            ->willReturn(['meta-webindexer']);
+            ->willReturn(new Filter(['meta-webindexer'], true));
 
-        $this->assertSame(['meta-webindexer'], $this->loader->getUserAgents(self::DOMAIN));
         $this->assertSame(
-            [json_encode(['userAgents' => ['meta-webindexer'], 'checkedAt' => self::NOW])],
+            ['userAgents' => ['meta-webindexer'], 'automation' => true],
+            $this->loader->getFilter(self::DOMAIN)->toArray()
+        );
+        $this->assertSame(
+            [json_encode(['userAgents' => ['meta-webindexer'], 'automation' => true, 'checkedAt' => self::NOW])],
             $this->saved
         );
     }
 
     public function testReplacesAnOldCopy(): void
     {
-        $this->givenCache(['old-bot'], self::NOW - Loader::FRESH_SECONDS);
-        $this->fetcher->method('fetch')->willReturn([]);
+        $this->givenCache(['userAgents' => ['old-bot'], 'automation' => true], self::NOW - Loader::FRESH_SECONDS);
+        $this->fetcher->method('fetch')->willReturn(Filter::none());
 
-        $this->assertSame([], $this->loader->getUserAgents(self::DOMAIN));
+        $this->assertTrue($this->loader->getFilter(self::DOMAIN)->isEmpty());
     }
 
-    public function testKeepsTheLastKnownListWhenTheDownloadFails(): void
+    public function testKeepsTheLastKnownFilterWhenTheDownloadFails(): void
     {
-        $this->givenCache(['old-bot'], self::NOW - Loader::FRESH_SECONDS);
+        $this->givenCache(['userAgents' => ['old-bot'], 'automation' => true], self::NOW - Loader::FRESH_SECONDS);
         $this->fetcher->method('fetch')->willReturn(null);
 
-        $this->assertSame(['old-bot'], $this->loader->getUserAgents(self::DOMAIN));
         $this->assertSame(
-            [json_encode(['userAgents' => ['old-bot'], 'checkedAt' => self::NOW])],
+            ['userAgents' => ['old-bot'], 'automation' => true],
+            $this->loader->getFilter(self::DOMAIN)->toArray()
+        );
+        $this->assertSame(
+            [json_encode(['userAgents' => ['old-bot'], 'automation' => true, 'checkedAt' => self::NOW])],
             $this->saved,
             'The failed attempt counts as a check, so the next pages do not wait for the tagging domain'
         );
     }
 
-    public function testFailedDownloadWithoutACopyGivesNoList(): void
+    public function testFailedDownloadWithoutACopyGivesNoFilter(): void
     {
         $this->cache->method('load')->willReturn(false);
         $this->fetcher->method('fetch')->willReturn(null);
 
-        $this->assertSame([], $this->loader->getUserAgents(self::DOMAIN));
+        $this->assertTrue($this->loader->getFilter(self::DOMAIN)->isEmpty());
     }
 
-    public function testChecksTheCachedListAgain(): void
+    public function testChecksTheCachedFilterAgain(): void
     {
-        $this->givenCache(['meta-webindexer', '<script>'], self::NOW);
+        $this->givenCache(['userAgents' => ['meta-webindexer', '<script>'], 'automation' => 'yes'], self::NOW);
 
-        $this->assertSame(['meta-webindexer'], $this->loader->getUserAgents(self::DOMAIN));
+        $this->assertSame(
+            ['userAgents' => ['meta-webindexer'], 'automation' => false],
+            $this->loader->getFilter(self::DOMAIN)->toArray()
+        );
+    }
+
+    public function testACopyFromBeforeAutomationHasItOff(): void
+    {
+        $this->givenCache(['userAgents' => ['meta-webindexer']], self::NOW);
+
+        $this->assertFalse($this->loader->getFilter(self::DOMAIN)->isAutomation());
     }
 
     /**
-     * @param string[] $userAgents
+     * @param array<string, mixed> $filter
      */
-    private function givenCache(array $userAgents, int $checkedAt): void
+    private function givenCache(array $filter, int $checkedAt): void
     {
         $this->cache->method('load')
             ->with('tagging_gtm_agent_filters_' . sha1(self::DOMAIN))
-            ->willReturn(json_encode(['userAgents' => $userAgents, 'checkedAt' => $checkedAt]));
+            ->willReturn(json_encode($filter + ['checkedAt' => $checkedAt]));
     }
 }
