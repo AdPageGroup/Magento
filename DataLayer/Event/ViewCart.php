@@ -43,7 +43,7 @@ class ViewCart implements EventInterface
      */
     public function get(): array
     {
-        return [
+        $eventData = [
             'meta' => [
                 'cacheable' => true,
                 'allowed_pages' => $this->getAllowedPages(),
@@ -56,6 +56,12 @@ class ViewCart implements EventInterface
                 'items' => $this->cartItems->get()
             ]
         ];
+
+        if ($eventData['ecommerce']['value'] === null) {
+            unset($eventData['ecommerce']['value']);
+        }
+
+        return $eventData;
     }
 
     /**

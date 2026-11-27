@@ -9,6 +9,7 @@ use Magento\Quote\Api\Data\CartItemInterface;
 use Magento\Store\Model\ScopeInterface;
 use Magento\Tax\Model\Config;
 use Tagging\GTM\Util\PriceFormatter;
+use Tagging\GTM\Util\PriceVisibility;
 use Tagging\GTM\Util\ProductProvider;
 
 class CartItemDataMapper
@@ -17,23 +18,27 @@ class CartItemDataMapper
     private ProductProvider $productProvider;
     private PriceFormatter $priceFormatter;
     private ScopeConfigInterface $scopeConfig;
+    private PriceVisibility $priceVisibility;
 
     /**
      * @param ProductDataMapper $productDataMapper
      * @param ProductProvider $productProvider
      * @param PriceFormatter $priceFormatter
      * @param ScopeConfigInterface $scopeConfig
+     * @param PriceVisibility $priceVisibility
      */
     public function __construct(
         ProductDataMapper $productDataMapper,
         ProductProvider $productProvider,
         PriceFormatter $priceFormatter,
-        ScopeConfigInterface $scopeConfig
+        ScopeConfigInterface $scopeConfig,
+        PriceVisibility $priceVisibility
     ) {
         $this->productDataMapper = $productDataMapper;
         $this->productProvider = $productProvider;
         $this->priceFormatter = $priceFormatter;
         $this->scopeConfig = $scopeConfig;
+        $this->priceVisibility = $priceVisibility;
     }
 
     /**
@@ -50,20 +55,26 @@ class CartItemDataMapper
             $cartItemData = [];
         }
 
-        return array_merge($cartItemData, [
+        $cartItemData = array_merge($cartItemData, [
             'item_sku' => $cartItem->getSku(),
             'item_name' => $cartItem->getName(),
             'order_item_id' => $cartItem->getItemId(),
             'quantity' => (float) $cartItem->getQty(),
             'price' => $this->getPrice($cartItem)
         ]);
+
+        if ($cartItemData['price'] === null) {
+            unset($cartItemData['price']);
+        }
+
+        return $cartItemData;
     }
 
     /**
      * @param CartItemInterface $cartItem
-     * @return float
+     * @return float|null
      */
-    private function getPrice(CartItemInterface $cartItem): float
+    private function getPrice(CartItemInterface $cartItem): ?float
     {
         $displayType = (int)$this->scopeConfig->getValue(
             Config::CONFIG_XML_PATH_PRICE_DISPLAY_TYPE,
@@ -82,6 +93,6 @@ class CartItemDataMapper
                 break;
         }
 
-        return $this->priceFormatter->format((float)$price);
+        return $this->priceVisibility->filter($this->priceFormatter->format((float)$price));
     }
 }
